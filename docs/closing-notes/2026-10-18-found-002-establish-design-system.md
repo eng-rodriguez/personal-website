@@ -1,8 +1,8 @@
 # The website now has a shared visual foundation with light and dark themes
 
-**Status:** Ready for review
+**Status:** Shipped
 **Date:** 2026-10-18 · **Milestone:** none · **Risk:** Standard
-**Links:** Ticket [FOUND-002](https://github.com/eng-rodriguez/personal-website/issues/2) · [Story](../stories/found-002-establish-design-system.md) · [Brief](../briefs/found-002-establish-design-system.md) · PR: not opened yet
+**Links:** Ticket [FOUND-002](https://github.com/eng-rodriguez/personal-website/issues/2) · [Story](../stories/found-002-establish-design-system.md) · [Brief](../briefs/found-002-establish-design-system.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/37)
 
 ## What we delivered
 The site now has one shared set of colors, text sizes and spacing that every future page will use, in both a light and a dark version. The site follows the visitor's device setting for light or dark. A first reusable button is in place, and keyboard users see a clear outline on whatever they are about to activate.
@@ -11,10 +11,12 @@ The site now has one shared set of colors, text sizes and spacing that every fut
 Later pages (articles, projects, resume) can be built quickly and look consistent, and readability for people with low vision is checked automatically instead of by eye.
 
 ## How we know it works
-- All 112 automated tests passed, and the full check passed on a clean install.
+- All 113 automated tests passed, and the full check passed on a clean install.
 - An automated test confirms every text and background color pairing meets the accessibility contrast standard in both themes; we confirmed it fails when a color is made too faint.
 - Three independent reviews (requirements, design and security) found no critical or important issues; six minor notes were left for later.
-- Not yet done: the hands-on browser walkthrough (themes, keyboard outline, high-contrast mode, palette sign-off).
+- A browser walkthrough confirmed both themes, the keyboard outline on every button, and that the site contacts no outside services. The owner then checked high-contrast mode and reduced motion and approved the palette.
+- One minor issue found during the walkthrough (unused styles in the published stylesheet) was fixed before release.
+- All automated checks on the pull request passed.
 
 ## Not included / deferred
 - A light/dark switch on the page, custom fonts, components other than the button, and automated browser tests are planned separately.
@@ -25,5 +27,5 @@ Later pages (articles, projects, resume) can be built quickly and look consisten
 - No leadership input needed.
 
 ## What's next
-- Owner runs the browser walkthrough and confirms the palette.
+- Optional cleanups from the reviews (six minor notes) can be picked up when the next component is added.
 - Next story: the content pipeline.
