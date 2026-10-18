@@ -4,7 +4,7 @@ import Home from "@/app/page";
 import { site } from "@/lib/site";
 
 describe("Home page", () => {
-  it("renders the level 1 heading and leaves the main landmark to the shell", () => {
+  it("test_ac1_renders_heading_and_leaves_main_landmark_to_the_shell", () => {
     render(<Home />);
 
     expect(

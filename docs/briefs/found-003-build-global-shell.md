@@ -270,3 +270,25 @@ Explicitly not changed: `package.json`, `package-lock.json`, `src/app/globals.cs
 - Repairs used: 0
 - Remaining blockers: none
 - Next action: owner reviews and commits; manual verification; open PR
+
+## Manual verification
+Added by the test agent. It complements the owner steps in section 9 and covers what jsdom cannot: real breakpoints, `:focus-visible`, forced colors, reduced motion, zoom, no-JS and the 404 page. Section 9 stays the source for steps that need no extra detail.
+
+Prerequisites: Node.js 24, a fresh clone of `feat/found-003-build-global-shell`, `npm ci`, Chrome or Edge with DevTools (device toolbar; Rendering panel for `prefers-color-scheme`, `forced-colors` and `prefers-reduced-motion` emulation).
+
+1. Build and serve: `npm run build && npm run start`, then open http://localhost:3000. Expected: the build route table lists `/`, `/writing`, `/projects`, `/experience`, `/resume` as static. Covers AC1, AC9.
+2. Built HTML: `for f in index writing projects experience resume; do echo $f $(grep -o '<main' .next/server/app/$f.html | wc -l); done`. Expected: 1 for each; `grep -o '<title>[^<]*' .next/server/app/writing.html` prints `Writing · Personal website`; `index.html` prints `Personal website`; `grep -l 'og:url\|rel="canonical"' .next/server/app/*.html` prints nothing. Covers AC1, AC7.
+3. Mobile at 375px (device toolbar). Expected: brand and a "Menu" button, no links visible. Click Menu: five links appear below the header row, the current page is bold and underlined. Click Writing: Writing loads with the menu closed. Reopen, press Escape: menu closes and Menu has focus. Reopen, click Menu: it closes. Open it, go to Projects, then Back and Forward: closed on each page. Links and Menu are 40px tall (inspect). Covers AC3, AC4, AC5.
+4. Desktop at 1280px, then exactly 768px. Expected: five inline links, no Menu button, the active link is bold and underlined on each of the five routes; at 768px the header fits or wraps without clipping. Open the menu at 375px, widen past 768px: inline links show, nothing stuck open; narrow again: closed. Covers AC1, AC2, AC4.
+5. No JavaScript: DevTools command menu, "Disable JavaScript", reload at 1280px. Expected: all five links visible and working. Re-enable JavaScript. Covers AC2 (server-rendered links).
+6. Zoom and 320px: at 1280px zoom to 200%, then set width to 320px at 100%. Expected: no horizontal scrollbar, no clipped brand or link. Covers the zoom edge case.
+7. 404: open http://localhost:3000/missing. Expected: header, footer and nav render, no link has an active style. Covers the unknown-route edge case (AC5).
+8. Focus, light theme: click the page background, press Tab. Expected: the first stop is a visible "Skip to main content" link; Enter moves focus to `main` (the next Tab does not return to the header); every header, nav and footer control shows an outline when reached by Tab, and mouse clicks show none. Covers AC6.
+9. Focus, dark theme: repeat step 8 with Rendering > `prefers-color-scheme: dark`. Expected: same behavior and the outline is visible against the dark background. Covers AC6.
+10. Forced colors: Rendering > `forced-colors: active`. Expected: the active link underline and the focus outline remain visible. Covers the forced-colors edge case (AC5, AC6).
+11. Reduced motion: Rendering > `prefers-reduced-motion: reduce`, hover nav links. Expected: color changes without a transition. Covers the reduced-motion edge case.
+12. Footer and network: read the footer on each route and watch the Network tab through steps 3 to 11. Expected: `© <current year> Personal website`, no email, phone or social link; only `localhost` is contacted. Covers AC8.
+13. Docs: read "Global shell" in `docs/design-system.md` and the CLAUDE.md Current state. Expected: shell, five routes, active link rule and mobile menu described. Covers AC10.
+14. Quality gates: `npm run check; echo $?` and `npm audit --audit-level=high --omit=dev; echo $?`. Expected: both exit 0. Covers AC9.
+
+Rollback check: the change has no flag. To roll back, revert the merge commit through a PR (`git revert -m 1 <merge-sha>`), then re-run step 1: the placeholder routes `/writing` etc. return the framework 404 and the home page renders its own `main`.
