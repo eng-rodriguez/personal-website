@@ -1,0 +1,98 @@
+# ci.yml — pull request gates. Free tooling only: no GitHub Advanced Security features. Actions are pinned; review updates in the factory before copying.
+# Stack jobs (web build/tests, container, infra) are added once the Next.js app exists.  `ci-ok` is the single job to require if your repo uses required checks.
+name: ci
+on:
+  pull_request:
+  merge_group:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: { contents: read, pull-requests: read }
+    outputs:
+      workflows: ${{ steps.filter.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { persist-credentials: false }
+      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3
+        id: filter
+        with:
+          filters: |
+            workflows: ['.github/**']
+
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { fetch-depth: 0, persist-credentials: false }
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with: { go-version: '1.24.2', cache: false }
+      - name: gitleaks
+        env:
+          GOSUMDB: sum.golang.org
+        run: |
+          go install github.com/zricethezav/gitleaks/v8@v8.21.2
+          gitleaks detect --no-banner --redact --log-opts="origin/${GITHUB_BASE_REF:-main}..HEAD"
+
+  workflows:
+    needs: changes
+    if: needs.changes.outputs.workflows == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { persist-credentials: false }
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+      - run: uvx zizmor==1.28.0 --min-severity medium --format plain .github/workflows
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with: { go-version: '1.24.2', cache: false }
+      - name: actionlint
+        env:
+          GOSUMDB: sum.golang.org
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
+          actionlint -color
+
+  scope:
+    if: startsWith(github.head_ref, 'feat/') || startsWith(github.head_ref, 'fix/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { fetch-depth: 0, persist-credentials: false }
+      - name: Changed files must appear in the brief
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          slug="${HEAD_REF#*/}"
+          brief="docs/briefs/${slug}.md"
+          [ -f "$brief" ] || { echo "::notice::No brief at $brief; scope check skipped"; exit 0; }
+          out=0
+          while IFS= read -r f; do
+            case "$f" in docs/*|*/tests/*|tests/*|*.test.ts|*.test.tsx|*/migrations/*|schema.yml|*/schema.yml|e2e/*) continue ;; esac
+            grep -qF "$f" "$brief" || { echo "::error file=$f::Not listed in $brief (Files that will change)"; out=1; }
+          done < <(git diff --name-only "origin/${BASE_REF}...HEAD")
+          exit $out
+
+  ci-ok:
+    if: always()
+    needs: [changes, secrets, workflows, scope]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: All required jobs passed or were skipped
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "$RESULTS"
+          for r in $RESULTS; do
+            case "$r" in success|skipped) ;; *) echo "::error::A required job ended with: $r"; exit 1 ;; esac
+          done
