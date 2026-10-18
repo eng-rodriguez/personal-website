@@ -1,5 +1,5 @@
 # ci.yml — pull request gates. Free tooling only: no GitHub Advanced Security features. Actions are pinned; review updates in the factory before copying.
-# Stack jobs (web build/tests, container, infra) are added once the Next.js app exists.  `ci-ok` is the single job to require if your repo uses required checks.
+# The `web` job runs the complete local check (`npm run check`) plus a dependency audit; container/infra jobs are added when those stacks exist.  `ci-ok` is the single job to require if your repo uses required checks.
 name: ci
 on:
   pull_request:
@@ -82,9 +82,25 @@ jobs:
           done < <(git diff --name-only "origin/${BASE_REF}...HEAD")
           exit $out
 
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci --ignore-scripts
+      - run: npm audit --audit-level=high --omit=dev
+      - run: npm run check
+
   ci-ok:
     if: always()
-    needs: [changes, secrets, workflows, scope]
+    needs: [changes, secrets, workflows, scope, web]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

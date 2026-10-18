@@ -204,3 +204,4 @@ Explicitly not added: `public/`, `src/app/favicon.ico`, `src/app/page.module.css
 - Repairs used: 0
 - Remaining blockers: none
 - Next action: factory:pipeline-builder runs step 2
+- Check evidence (step 2, pipeline): `.github/workflows/ci.yml` gains a `web` job (npm ci --ignore-scripts, npm audit --audit-level=high --omit=dev, npm run check) and `web` in `ci-ok` needs; `.github/dependabot.yml` gains the npm entry. Local static evidence only: actionlint exit 0; zizmor 1.28.0 `--min-severity medium` exit 0, no findings (offline mode); dependabot.yml parses as YAML. No actual CI run yet. setup-node SHA 49933ea5 verified as v4.
