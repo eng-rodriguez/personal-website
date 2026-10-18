@@ -1,5 +1,6 @@
-# .github/dependabot.yml — add an npm entry for directory / once the Next.js app is scaffolded at the root.
+# .github/dependabot.yml — npm (app at the repo root) and github-actions. npm majors (Next.js, React, TypeScript) are taken through stories.
 # GitHub Actions majors stay enabled: actions are pinned to SHAs and each update is reviewed.
 version: 2
 updates:
   - { package-ecosystem: github-actions, directory: /, schedule: { interval: weekly }, groups: { actions: { patterns: ["*"] } }, commit-message: { prefix: ci } }
+  - { package-ecosystem: npm, directory: /, schedule: { interval: weekly }, groups: { npm-minor: { update-types: [minor, patch] } }, ignore: [{ dependency-name: "*", update-types: ["version-update:semver-major"] }], commit-message: { prefix: build, include: scope } }
