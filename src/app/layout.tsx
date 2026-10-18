@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { site } from "@/lib/site";
 import "./globals.css";
@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: site.name,
   description: site.description,
 };
+
+export const viewport: Viewport = { colorScheme: "light dark" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

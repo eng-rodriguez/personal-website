@@ -2,7 +2,7 @@
 Personal engineering website featuring technical writing, projects, professional experience and resume. Context: personal.
 
 ## Current state
-The Next.js App Router application is scaffolded at the repository root (`src/app`, placeholder home page, Vitest unit tests for the home page, the `@/*` alias and the scaffold configuration). No content, styling system, MDX or e2e tests yet. Installed versions from `package-lock.json`: next 16.4.2, react 19.3.1, typescript 6.0.3, eslint 10.13.0, prettier 3.9.10, vitest 5.0.5.
+The Next.js App Router application is scaffolded at the repository root (`src/app`, placeholder home page, Vitest unit tests for the home page, the `@/*` alias and the scaffold configuration). Tailwind CSS v4 and shadcn/ui are installed (Button only): tokens, themes and base styles are in `src/app/globals.css`, documented in `docs/design-system.md`. Installed versions: tailwindcss 4.3.3, @tailwindcss/postcss 4.3.3, radix-ui 1.6.7, class-variance-authority 0.7.1, clsx 2.1.1, tailwind-merge 3.7.0. No content, MDX or e2e tests yet. Installed versions from `package-lock.json`: next 16.4.2, react 19.3.1, typescript 6.0.3, eslint 10.13.0, prettier 3.9.10, vitest 5.0.5.
 TypeScript is pinned with `~6.0.3` and stays below 7: the TypeScript 7 native port does not provide the compiler API that Next.js type checking and typescript-eslint load, and typescript-eslint 8.71 accepts `<6.1.0`. Move to 7 only through a story.
 ESLint stays on 10 although `npm ci` prints 3 `ERESOLVE overriding peer dependency` warnings: the latest `eslint-plugin-import`, `eslint-plugin-jsx-a11y` and `eslint-plugin-react` used by `eslint-config-next` declare peers up to `^9` only, and ESLint 9 is end-of-life. Lint works; do not downgrade to silence the warnings. This supersedes FOUND-001 brief D4 (see `docs/reviews/eslint-10-peer-warnings.md`).
 
@@ -10,7 +10,7 @@ ESLint stays on 10 although `npm ci` prints 3 `ERESOLVE overriding peer dependen
 These are decided. Implement them through approved stories; do not reopen them without a new decision recorded in `docs/adr/`.
 - Framework: Next.js App Router with React.
 - Language: TypeScript in strict mode.
-- Styling and UI: Tailwind CSS and shadcn/ui.
+- Styling and UI: Tailwind CSS and shadcn/ui. Tailwind v4 CSS-first tokens, OS-only theming, outline focus and a contrast test (ADR 0002, `docs/adr/0002-tailwind-v4-tokens-os-only-theming.md`).
 - Content: local MDX files in the repository, with frontmatter validated by Zod schemas.
 - Package manager: npm (`package-lock.json` is the lockfile).
 - Node.js 24, pinned in `.nvmrc` and `package.json` `engines` (`24.x`); CI reads `.nvmrc` (ADR 0001, `docs/adr/0001-pin-node-24-and-check-script.md`).
@@ -34,6 +34,7 @@ Decide these in stories or ADRs before implementing the parts they affect.
 
 ## Factory routing
 - Application code: factory:react-builder with stack-react for components and hooks. Next.js App Router routing, rendering and data loading follow the framework's documentation for the installed version.
+- shadcn CLI: run only a pinned version at least 2 weeks old (`npx --yes shadcn@<version>`), never `@latest`; follow `docs/design-system.md` afterwards.
 - `.github/`: factory:pipeline-builder with devsecops-gha.
 - `.factory.yml` registers `web: { path: ., stack: react }` and `commands.check: npm run check`.
 
@@ -49,7 +50,7 @@ Decide these in stories or ADRs before implementing the parts they affect.
 Never deploy from the development workflow. Unknown commands are not verification.
 
 ## Paths
-- Application: repository root; routes and components in `src/app`, shared modules in `src/lib`, imported through the `@/*` alias.
+- Application: repository root; routes and components in `src/app`, shadcn primitives in `src/components/ui`, shared modules in `src/lib`, imported through the `@/*` alias. Styling configuration: `components.json`, `postcss.config.mjs`.
 - Planning artifacts: `docs/domain.md`, `docs/adr/`, `docs/briefs/`, `docs/stories/`, `docs/closing-notes/`, `docs/reviews/` (lite change records).
 - CI: `.github/workflows/ci.yml`, `.github/workflows/pr-format.yml`, `.github/dependabot.yml`.
 
