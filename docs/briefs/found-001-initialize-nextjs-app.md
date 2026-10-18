@@ -119,12 +119,25 @@ Step 1 local checks run from the repository root on Node.js 24.19.0 / npm 11.17.
 Blocked until the PR exists: environment evidence for AC11 (the actual GitHub Actions run). Not proven by this story: that `ci-ok` fails when `web` fails. Static evidence covers it, because the existing loop fails on any result other than success or skipped. A deliberately failing CI run is optional. No Vercel or environment evidence applies.
 
 ### Manual verification
-Run by the owner on a fresh clone with Node.js 24 before marking the PR ready. Record who ran it and the result in the Checkpoint; builders do not claim it.
-1. `nvm use` selects Node 24 from `.nvmrc`.
-2. `npm ci` completes without `EBADENGINE` or peer warnings.
-3. `npm run dev`, then open `http://localhost:3000`: the placeholder heading renders with no console errors, and no requests go to third-party hosts (check the Network tab).
-4. `npm run check` exits 0 and runs typecheck, lint, format:check, test and build in that order.
-5. Do the AC5 negative check once and revert it.
+Run by the owner on a fresh clone with Node.js 24 before marking the PR ready. Record who ran it and the result in the Checkpoint; builders do not claim it. Items marked "automated" were also run by the test agent on the working tree (Node 24.19.0 / npm 11.17.0); that does not replace the human run.
+
+Prerequisites: a fresh clone of branch `feat/found-001-initialize-nextjs-app`, `nvm` installed, a browser with dev tools.
+
+1. `nvm use` then `node -v`. Expected: `v24.x`. Covers AC9.
+2. `npm ci`. Expected: exit 0, no `EBADENGINE`, no peer warnings. Covers AC1, AC8, AC9. Automated: `npm ci --ignore-scripts` exit 0.
+3. `cp .env.example .env.local` (optional). Expected: the app behaves the same. Covers AC7.
+4. `npm run dev`, then `curl -i http://localhost:3000`. Expected: `HTTP/1.1 200` and `<h1>Personal website</h1>` in the body. Covers AC7. Automated: HTTP 200 and the h1 confirmed.
+5. Open `http://localhost:3000` in a browser. Expected: heading renders, no console errors, and the Network tab shows no requests to third-party hosts. Covers AC7. Human only. Note: `next dev` creates an untracked `AGENTS.md` at the repository root; do not commit it (see Checkpoint).
+6. Stop the dev server, then `npm run check`. Expected: exit 0 and output in the order typecheck, lint, format:check, test, build. Covers AC1 to AC6. Automated: exit 0, Vitest 3 files / 5 tests passed.
+7. AC5 negative check: append `export const bad: number = "x";` to `src/lib/site.ts`, run `npm run check; echo $?`. Expected: stops at `typecheck` with a TS2322 error, non-zero exit, no lint or build output. Then `git checkout src/lib/site.ts`. Covers AC5. Automated: non-zero exit (1), reverted.
+8. `git ls-files package-lock.json .env.example` lists both; `git check-ignore -v node_modules .next .env .env.local` matches all four; `git check-ignore .env.example` prints nothing; `grep -vE '^\s*(#|$)' .env.example` prints nothing. Covers AC8. Automated: all confirmed.
+9. `yq '.areas.web, .commands.check' .factory.yml` shows `path: .`, `stack: react` and `npm run check`; `yq '.updates[].package-ecosystem' .github/dependabot.yml` shows `github-actions` and `npm`. Covers AC10, AC12. Automated: confirmed.
+10. `actionlint` and `zizmor --min-severity medium .github/workflows` exit 0. Covers AC11 (static). Automated: both exit 0.
+11. Open the PR and check the `ci` run: `web` succeeds on Node 24.x and `ci-ok` passes. Covers AC11 (environment). Human only; blocked until the PR exists.
+12. `npm ls next react typescript vitest eslint prettier --depth=0` and compare with CLAUDE.md Current state (next 16.4.2, react 19.3.1, typescript 6.0.3, eslint 10.13.0, prettier 3.9.10, vitest 5.0.5). Covers AC13. Automated: matches.
+13. README: follow its Local setup section end to end on the fresh clone and confirm it names Node 24, the script names and the `.env.example` copy. Covers AC7. Human only.
+
+Rollback: revert the merge commit through a PR (section 12). Nothing is deployed and there is no flag.
 
 ## 10. Docs impact and observability
 - `README.md`: add a "Local setup" section covering the required Node.js 24 (`.nvmrc`, `nvm use`), `npm ci`, `cp .env.example .env.local` (optional; no variables yet), `npm run dev` at `http://localhost:3000`, a table of npm scripts (`dev`, `build`, `start`, `typecheck`, `lint`, `format`, `format:check`, `test`, `check`), `npm run check` as the full verification, and the telemetry opt-out. Keep the existing title and description.
@@ -200,7 +213,9 @@ Explicitly not added: `public/`, `src/app/favicon.ico`, `src/app/page.module.css
   - setup-node SHA `49933ea5288caeca8642d1e84afbd3f7d6820020` resolves to tags `v4` and `v4.4.0` (git ls-remote).
   - Deviations: `.claude/` added to `.prettierignore` (local-only `.claude/settings.local.json` is ignored by the owner's global git ignore, not the repo, and failed `format:check`); the generated `cacheComponents` and `partialPrefetching` options were dropped from `next.config.ts` per D15.
   - `npm audit` (all deps) reports 5 high advisories (braces chain via `eslint-config-next` > `@next/eslint-plugin-next` > `fast-glob`). Dev-only, none in production deps; left for Dependabot.
-- Manual verification: pending
+- Manual verification: human run pending (owner). Automated portion done by the test agent, see Test evidence.
+- Test evidence (test agent, Node 24.19.0 / npm 11.17.0): added `src/lib/site.test.ts` (AC6 alias) and `src/scaffold.test.ts` (AC2 strict, AC5 check order, AC9 Node pin); both match the scope job's `*.test.ts` ignore. After `rm -rf node_modules .next && npm ci --ignore-scripts`: `npm run check` exit 0 (re-run twice); typecheck, lint, format:check, build each exit 0; Vitest 3 files / 5 tests passed. AC5 negative check: TS2322 in `src/lib/site.ts` stopped `npm run check` at typecheck, exit 1; reverted. `npm run dev`: GET / returned 200 with `<h1>Personal website</h1>`. AC8, AC10, AC12, AC13 verified by inspection and commands; actionlint and zizmor exit 0. AC11 environment evidence still blocked on the PR.
+- Finding (unrelated to the AC set, uncertain scope): running `npm run dev` generated an untracked `AGENTS.md` (Next.js agent rules) at the repository root. The brief lists `AGENTS.md` under "Explicitly not added", so it must not be committed; it was left in place for the owner to delete or gitignore.
 - Repairs used: 0
 - Remaining blockers: none
 - Next action: factory:pipeline-builder runs step 2
