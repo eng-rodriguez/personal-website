@@ -4,7 +4,7 @@ Personal engineering website featuring technical writing, projects, professional
 ## Current state
 The Next.js App Router application is scaffolded at the repository root (`src/app`, placeholder home page, Vitest unit tests for the home page, the `@/*` alias and the scaffold configuration). No content, styling system, MDX or e2e tests yet. Installed versions from `package-lock.json`: next 16.4.2, react 19.3.1, typescript 6.0.3, eslint 10.13.0, prettier 3.9.10, vitest 5.0.5.
 TypeScript is pinned with `~6.0.3` and stays below 7: the TypeScript 7 native port does not provide the compiler API that Next.js type checking and typescript-eslint load, and typescript-eslint 8.71 accepts `<6.1.0`. Move to 7 only through a story.
-ESLint stays on 10 although `npm ci` prints 3 `ERESOLVE overriding peer dependency` warnings: the latest `eslint-plugin-import`, `eslint-plugin-jsx-a11y` and `eslint-plugin-react` used by `eslint-config-next` declare peers up to `^9` only, and ESLint 9 is end-of-life. Lint works; do not downgrade to silence the warnings (see `docs/reviews/eslint-10-peer-warnings.md`).
+ESLint stays on 10 although `npm ci` prints 3 `ERESOLVE overriding peer dependency` warnings: the latest `eslint-plugin-import`, `eslint-plugin-jsx-a11y` and `eslint-plugin-react` used by `eslint-config-next` declare peers up to `^9` only, and ESLint 9 is end-of-life. Lint works; do not downgrade to silence the warnings. This supersedes FOUND-001 brief D4 (see `docs/reviews/eslint-10-peer-warnings.md`).
 
 ## Approved decisions (to implement)
 These are decided. Implement them through approved stories; do not reopen them without a new decision recorded in `docs/adr/`.
@@ -50,7 +50,7 @@ Never deploy from the development workflow. Unknown commands are not verificatio
 
 ## Paths
 - Application: repository root; routes and components in `src/app`, shared modules in `src/lib`, imported through the `@/*` alias.
-- Planning artifacts: `docs/domain.md`, `docs/adr/`, `docs/briefs/`, `docs/stories/`, `docs/closing-notes/`.
+- Planning artifacts: `docs/domain.md`, `docs/adr/`, `docs/briefs/`, `docs/stories/`, `docs/closing-notes/`, `docs/reviews/` (lite change records).
 - CI: `.github/workflows/ci.yml`, `.github/workflows/pr-format.yml`, `.github/dependabot.yml`.
 
 ## Verification and recovery
