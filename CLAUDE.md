@@ -2,7 +2,7 @@
 Personal engineering website featuring technical writing, projects, professional experience and resume. Context: personal.
 
 ## Current state
-The Next.js App Router application is scaffolded at the repository root (`src/app`, placeholder home page, one Vitest smoke test). No content, styling system, MDX or e2e tests yet. Installed versions from `package-lock.json`: next 16.4.2, react 19.3.1, typescript 6.0.3, eslint 10.13.0, prettier 3.9.10, vitest 5.0.5.
+The Next.js App Router application is scaffolded at the repository root (`src/app`, placeholder home page, Vitest unit tests for the home page, the `@/*` alias and the scaffold configuration). No content, styling system, MDX or e2e tests yet. Installed versions from `package-lock.json`: next 16.4.2, react 19.3.1, typescript 6.0.3, eslint 10.13.0, prettier 3.9.10, vitest 5.0.5.
 TypeScript is pinned with `~6.0.3` and stays below 7: the TypeScript 7 native port does not provide the compiler API that Next.js type checking and typescript-eslint load, and typescript-eslint 8.71 accepts `<6.1.0`. Move to 7 only through a story.
 
 ## Approved decisions (to implement)

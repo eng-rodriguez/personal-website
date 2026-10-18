@@ -196,10 +196,10 @@ Explicitly not added: `public/`, `src/app/favicon.ico`, `src/app/page.module.css
 - Builder-verified at implementation (record results in the Checkpoint): the TypeScript version chosen under D3, the ESLint major under D4, the jest-dom 7 `vitest` export path, whether `--ignore-scripts` works (D18), the setup-node SHA-to-tag mapping, and whether `next typegen` exists in 16.4.2.
 
 ## 14. Checkpoint
-- Phase: step 1 (application) implemented; pipeline step pending
+- Phase: builders, tests and reviews complete; final owner review pending
 - Scope: FOUND-001 as in the approved story; CI web job and Dependabot npm entry included by owner decision
-- Baseline: `origin/main` b9b9b13; current revision: n/a (branch not created)
-- Preserved user edits: `docs/stories/found-001-initialize-nextjs-app.md` (untracked, approved story)
+- Baseline: `origin/main` b9b9b13; branch `feat/found-001-initialize-nextjs-app`; planning commit 1c8a36e
+- Preserved user edits: none
 - Revisions: 0
 - Approvals: story approved by owner (CI web job and Dependabot npm included); brief approved by owner with `npm audit` added to the web job
 - Check evidence (step 1, Node 24.19.0 / npm 11.17.0): `rm -rf node_modules .next && npm ci --ignore-scripts && npm run check` exit 0; typecheck, lint, format:check, test (1 file, 1 test passed), build each exit 0; `npm ls` exit 0 (no invalid or missing peers); `npm audit --audit-level=high --omit=dev` exit 0 (0 vulnerabilities). AC5 negative check: a type error in `src/lib/site.ts` made `npm run check` exit 2 at typecheck; reverted.
@@ -218,5 +218,6 @@ Explicitly not added: `public/`, `src/app/favicon.ico`, `src/app/page.module.css
 - Finding (unrelated to the AC set, uncertain scope): running `npm run dev` generated an untracked `AGENTS.md` (Next.js agent rules) at the repository root. The brief lists `AGENTS.md` under "Explicitly not added", so it must not be committed; it was left in place for the owner to delete or gitignore.
 - Repairs used: 0
 - Remaining blockers: none
-- Next action: factory:pipeline-builder runs step 2
 - Check evidence (step 2, pipeline): `.github/workflows/ci.yml` gains a `web` job (npm ci --ignore-scripts, npm audit --audit-level=high --omit=dev, npm run check) and `web` in `ci-ok` needs; `.github/dependabot.yml` gains the npm entry. Local static evidence only: actionlint exit 0; zizmor 1.28.0 `--min-severity medium` exit 0, no findings (offline mode); dependabot.yml parses as YAML. No actual CI run yet. setup-node SHA 49933ea5 verified as v4.
+- Reviews (implementation, design, security): no Critical or Important in-scope findings. Minor findings and deferred items are listed in the PR handoff. gitleaks over `1c8a36e..HEAD` found no leaks; lockfile resolves only from registry.npmjs.org with sha512 integrity.
+- Next action: owner final review, then open the PR (do not merge).
