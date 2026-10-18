@@ -1,8 +1,8 @@
 # The website now has a working, automatically checked foundation
 
-**Status:** Ready for review
+**Status:** Shipped
 **Date:** 2026-10-18 · **Milestone:** none · **Risk:** Standard
-**Links:** Ticket [FOUND-001](https://github.com/eng-rodriguez/personal-website/issues/1) · [Story](../stories/found-001-initialize-nextjs-app.md) · [Brief](../briefs/found-001-initialize-nextjs-app.md) · PR: pending
+**Links:** Ticket [FOUND-001](https://github.com/eng-rodriguez/personal-website/issues/1) · [Story](../stories/found-001-initialize-nextjs-app.md) · [Brief](../briefs/found-001-initialize-nextjs-app.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/33)
 
 ## What we delivered
 The personal website project now has a starting application with a placeholder home page. One command checks the code for errors, style problems and failing tests, then builds the site. The same check runs automatically on every proposed change, and dependency updates are now suggested automatically each week.
@@ -13,8 +13,8 @@ Every later piece of the site, such as articles, projects and the resume, can no
 ## How we know it works
 - All 5 automated tests passed, and the full check passed on a clean install.
 - Three independent reviews (requirements, design and security) found no critical or important issues.
-- The automated check on the pull request has not run yet; it runs once the pull request is opened.
-- The developer's own manual walkthrough is still to be done.
+- All automated checks on the pull request passed.
+- A manual walkthrough after release passed 11 of 13 steps. One step passed with harmless tool warnings and one optional step was skipped.
 
 ## Not included / deferred
 - Visual styling, real pages and content, end-to-end browser tests and hosting setup are planned as separate stories.
@@ -25,5 +25,5 @@ Every later piece of the site, such as articles, projects and the resume, can no
 - No leadership input needed.
 
 ## What's next
-- Open the pull request, confirm the automated check passes, and review.
+- Optionally clear the harmless warnings from the code-checking tools.
 - Next stories: styling setup, then the content pipeline.
