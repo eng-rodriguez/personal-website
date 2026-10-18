@@ -42,7 +42,17 @@ When a pair fails, change only the lightness of the token.
 
 - Focus is drawn with an `outline` on `:focus-visible` (a global rule in `globals.css`). Outlines stay visible in forced-colors mode; box-shadows do not.
 - Never use `outline-none` without a replacement outline, and never rely on a ring or shadow alone.
-- Do not use plain `focus:` styles, so mouse clicks show no indicator.
+- Do not use plain `focus:` styles, so mouse clicks show no indicator. The skip link is the one exception (see Global shell).
+
+## Global shell
+
+- Landmarks: the root layout renders one skip link, a `header` (banner), a `nav` named "Primary", one `main#main-content` and a `footer` (contentinfo). Pages render content only and never their own `main`.
+- Container: `containerClassName` in `src/components/site/container.ts` (`max-w-prose` reading width, `px-6`), shared by the header, `main` and the footer.
+- Breakpoint: `md` (48rem). Below it the navigation is a disclosure (Menu button with `aria-expanded` and `aria-controls`) that closes on link choice, pathname change, Escape (focus returns to the toggle) and widening past `md`. At `md` and wider the links are always visible.
+- Active link rule: `isActive` in `src/lib/navigation.ts` (Home exact, sections exact or nested, pathname only). The active link has `aria-current="page"`, an underline and semibold weight, never color alone.
+- Skip link: the only allowed plain `focus:` utilities, used for visibility and position. The indicator stays the global outline.
+- Adding a core route: add it to `primaryNav`, add its page with a `metadata.title`, and update ADR 0003.
+- Target size: interactive shell controls use `min-h-10`.
 
 ## Reduced motion
 

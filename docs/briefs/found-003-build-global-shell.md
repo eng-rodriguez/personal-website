@@ -261,12 +261,12 @@ Explicitly not changed: `package.json`, `package-lock.json`, `src/app/globals.cs
 - Resolved in this brief: in-flow disclosure rather than an overlay (D6); state reset on pathname change without an effect (D6); a document-level Escape listener (D6); no `not-found.tsx` (D8); no new tokens (D9).
 
 ## 14. Checkpoint
-- Phase: brief approved, implementation
+- Phase: implementation complete, pending owner commit and manual verification
 - Scope: FOUND-003 as in the approved story
 - Baseline: `origin/main` b67fb31a29f65c0bb91ec3c84ab80be8cc178080, clean tree; branch `feat/found-003-build-global-shell`
 - Revisions: 0
 - Approvals: story, brief and ADR 0003 approved by owner
-- Check evidence: none yet
+- Check evidence: `npm run check` exit 0 (typecheck, ESLint, Prettier, Vitest 11 files / 150 tests, build). Route table: `/`, `/writing`, `/projects`, `/experience`, `/resume` all static (○). Built HTML for all five routes: one `<main`, `id="main-content"`, `aria-label="Primary"`, `<footer`, five hrefs, no `og:url` or canonical; `index.html` title "Personal website", `writing.html` title "Writing · Personal website", both have a description meta; footer shows 2026. `npm audit --audit-level=high --omit=dev` exit 0. `package.json` and `package-lock.json` unchanged. Builder-verified (section 13): `next/link` renders in jsdom with only the `usePathname` mock (no extra mock); importing `layout.tsx` in a node-environment test works with Vitest's CSS stubbing; five routes build as static. Manual verification (section 9) not run by the builder.
 - Repairs used: 0
 - Remaining blockers: none
-- Next action: factory:react-builder implements section 11
+- Next action: owner reviews and commits; manual verification; open PR
