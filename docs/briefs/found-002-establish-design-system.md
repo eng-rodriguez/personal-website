@@ -223,7 +223,7 @@ Explicitly not added: `tailwind.config.*`, `src/hooks/`, other `src/components/u
 - Resolved in this brief: oklch rather than hex (ADR 0002); no `tw-animate-css`, `lucide-react` or `user-event` (D2, D10); Button not rendered on the home page (D8).
 
 ## 14. Checkpoint
-- Phase: implemented (d7ad8c8), tests verified, reviews done; awaiting owner final review
+- Phase: PR #37 open; manual verification run; awaiting owner sign-off on palette, forced colors and reduced motion
 - Scope: FOUND-002 as in the approved story
 - Baseline: `main` 53d9d46 (clean); branch `feat/found-002-establish-design-system`
 - Preserved user edits: none
@@ -245,5 +245,20 @@ Explicitly not added: `tailwind.config.*`, `src/hooks/`, other `src/components/u
 - Test verification: every AC mapped to tests or Manual verification steps; no tests added; negative contrast check reproduced
 - Reviews (implementation-validator, design-reviewer, security-reviewer): 0 Critical, 0 Important, 6 Minor in scope (none fixed: generated `aria-invalid:ring-destructive/20` has no ring width; hand-maintained contrast pair lists; `.dark` regex check is coarse; duplicate "Installed versions" sentence in CLAUDE.md; `components.json` keeps `iconLibrary: lucide`; `radix-ui` umbrella brings 63 `@radix-ui/*` packages for `Slot` only)
 - Deferred unrelated: 5 high `braces` advisories in dev dependencies, identical at baseline 53d9d46 (`npm audit --package-lock-only`); production audit clean
-- Remaining blockers: Manual verification steps 5 to 13 (human; step 13 needs the PR)
-- Next action: owner final review, then commit closing notes, push and open the PR
+- Manual verification (2026-10-18, fresh clone of the branch at f6758e9, Node 24.19.0, run from the development session with the in-app Chromium browser; not an owner run):
+  - 1 passed: `npm ci` exit 0, only the 3 known `ERESOLVE` notices, no `EBADENGINE`.
+  - 2 passed: `npm run check` exit 0, 6 test files, 112 tests.
+  - 3 passed: production audit exit 0, `npm ls --depth=0` exit 0.
+  - 4 passed: light `--muted-foreground` set to the `--muted` value failed `muted-foreground on muted` and `muted-foreground on background` (light); reverted.
+  - 5 done: every variant plus a disabled Button mounted in the clone's `page.tsx` only; dev server on port 3100.
+  - 6 passed with a gap: emulated light and dark each rendered the matching theme (body background and text from the tokens, `color-scheme: light dark`, viewport meta present, no theme script, no toggle). Theme comes from a render-blocking stylesheet media query, so there is no flash by construction; slow-network throttling and the scrollbar were not observed.
+  - 7 passed: in both themes Tab reached all 7 enabled Buttons with `:focus-visible` matched and a solid 2px `--ring` outline offset 2px, visible in screenshots; the disabled Button was skipped; a mouse click left `:focus-visible` false and no outline. The outline animates in over 150 ms because the Button uses `transition-all`.
+  - 8 not run: forced-colors emulation is not available in the in-app browser. Code evidence only (outline, not box-shadow).
+  - 9 not run: reduced-motion emulation is not available in the in-app browser. The served CSS contains the base reduced-motion rule and `motion-reduce:transition-none`.
+  - 10 passed for network (only `localhost:3100` requested; no font or analytics requests). Palette sign-off pending the owner.
+  - 11 done: the clone was discarded; this checkout was not modified.
+  - 12 passed for structure: `docs/design-system.md` has every section 10 topic. Owner read pending.
+  - 13 passed: on PR #37, `web`, `scope`, `secrets`, `changes`, `pr-format` and `ci-ok` passed; `workflows` skipped (no `.github/` change).
+- New Minor finding (in scope): Tailwind v4 automatic source detection scans `docs/`, so class names quoted in the ADR, brief and design-system doc (`dark:bg-input/30`, `dark:border-input`, `ring-[3px]`, `text-9xl` and others) are emitted into the production CSS as unused rules. No element uses them. Fix option: `@source not "../../docs";` in `globals.css`.
+- Remaining blockers: owner checks for steps 8 and 9, palette sign-off (step 10) and docs read (step 12)
+- Next action: owner completes the remaining checks and decides on the Tailwind source Minor finding, then merges
