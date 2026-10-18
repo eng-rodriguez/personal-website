@@ -196,7 +196,7 @@ Explicitly not added: `public/`, `src/app/favicon.ico`, `src/app/page.module.css
 - Builder-verified at implementation (record results in the Checkpoint): the TypeScript version chosen under D3, the ESLint major under D4, the jest-dom 7 `vitest` export path, whether `--ignore-scripts` works (D18), the setup-node SHA-to-tag mapping, and whether `next typegen` exists in 16.4.2.
 
 ## 14. Checkpoint
-- Phase: builders, tests and reviews complete; final owner review pending
+- Phase: shipped. PR #33 merged to `main` as 2dc0f18 on 2026-10-18; manual verification run after merge
 - Scope: FOUND-001 as in the approved story; CI web job and Dependabot npm entry included by owner decision
 - Baseline: `origin/main` b9b9b13; branch `feat/found-001-initialize-nextjs-app`; planning commit 1c8a36e
 - Preserved user edits: none
@@ -213,11 +213,24 @@ Explicitly not added: `public/`, `src/app/favicon.ico`, `src/app/page.module.css
   - setup-node SHA `49933ea5288caeca8642d1e84afbd3f7d6820020` resolves to tags `v4` and `v4.4.0` (git ls-remote).
   - Deviations: `.claude/` added to `.prettierignore` (local-only `.claude/settings.local.json` is ignored by the owner's global git ignore, not the repo, and failed `format:check`); the generated `cacheComponents` and `partialPrefetching` options were dropped from `next.config.ts` per D15.
   - `npm audit` (all deps) reports 5 high advisories (braces chain via `eslint-config-next` > `@next/eslint-plugin-next` > `fast-glob`). Dev-only, none in production deps; left for Dependabot.
-- Manual verification: human run pending (owner). Automated portion done by the test agent, see Test evidence.
+- Manual verification (2026-10-18, run after merge on a fresh clone of `main` at 2dc0f18, Node 24.19.0 / npm 11.17.0). Executed through Claude Code at the owner's request, not by hand:
+  1. Passed: `.nvmrc` is `24` and Node v24.19.0 was active. `nvm` is not installed on the machine, so `nvm use` itself was not run.
+  2. Passed with a warning: `npm ci` exit 0 with no `EBADENGINE`, but npm printed 3 `ERESOLVE overriding peer dependency` warnings. `eslint-plugin-import`, `eslint-plugin-jsx-a11y` and `eslint-plugin-react`, all from `eslint-config-next`, do not yet declare ESLint 10 in their peer ranges. Lint passes and `npm ls` is clean. Minor; fix by moving ESLint to `^9` or by waiting for plugin support.
+  3. Not run: the optional `.env.local` copy was not executed.
+  4. Passed: the dev server returned `HTTP/1.1 200 OK` with `<h1>Personal website</h1>`.
+  5. Passed: in a browser, the heading and description render, there are no console errors, and `localhost` is the only host contacted.
+  6. Passed: `npm run check` exit 0, steps in order; Vitest 3 files / 5 tests passed; the build compiled.
+  7. Passed: a deliberate TS2322 stopped `npm run check` at typecheck with exit 2; reverted.
+  8. Passed: lockfile and `.env.example` are tracked; `node_modules`, `.next`, `.env` and `.env.local` are ignored; `.env.example` is not ignored and has 0 non-comment lines.
+  9. Passed: `.factory.yml` web is `{path: ., stack: react}` with `npm run check`; Dependabot ecosystems are `github-actions` and `npm`.
+  10. Passed: actionlint exit 0; zizmor `--min-severity medium` exit 0, no findings.
+  11. Passed: on PR head dbd5547, `web`, `scope`, `secrets`, `workflows`, `changes`, `ci-ok` and `pr-format` (after the body fix) succeeded.
+  12. Passed: installed versions match CLAUDE.md (next 16.4.2, react 19.3.1, typescript 6.0.3, eslint 10.13.0, prettier 3.9.10, vitest 5.0.5).
+  13. Passed: the README Local setup names Node 24, `nvm use`, `npm ci`, the `.env.example` copy, `npm run dev`, every script and `npm run check`.
 - Test evidence (test agent, Node 24.19.0 / npm 11.17.0): added `src/lib/site.test.ts` (AC6 alias) and `src/scaffold.test.ts` (AC2 strict, AC5 check order, AC9 Node pin); both match the scope job's `*.test.ts` ignore. After `rm -rf node_modules .next && npm ci --ignore-scripts`: `npm run check` exit 0 (re-run twice); typecheck, lint, format:check, build each exit 0; Vitest 3 files / 5 tests passed. AC5 negative check: TS2322 in `src/lib/site.ts` stopped `npm run check` at typecheck, exit 1; reverted. `npm run dev`: GET / returned 200 with `<h1>Personal website</h1>`. AC8, AC10, AC12, AC13 verified by inspection and commands; actionlint and zizmor exit 0. AC11 environment evidence still blocked on the PR.
 - Finding (unrelated to the AC set, uncertain scope): running `npm run dev` generated an untracked `AGENTS.md` (Next.js agent rules) at the repository root. The brief lists `AGENTS.md` under "Explicitly not added", so it must not be committed; it was left in place for the owner to delete or gitignore.
 - Repairs used: 0
 - Remaining blockers: none
 - Check evidence (step 2, pipeline): `.github/workflows/ci.yml` gains a `web` job (npm ci --ignore-scripts, npm audit --audit-level=high --omit=dev, npm run check) and `web` in `ci-ok` needs; `.github/dependabot.yml` gains the npm entry. Local static evidence only: actionlint exit 0; zizmor 1.28.0 `--min-severity medium` exit 0, no findings (offline mode); dependabot.yml parses as YAML. No actual CI run yet. setup-node SHA 49933ea5 verified as v4.
 - Reviews (implementation, design, security): no Critical or Important in-scope findings. Minor findings and deferred items are listed in the PR handoff. gitleaks over `1c8a36e..HEAD` found no leaks; lockfile resolves only from registry.npmjs.org with sha512 integrity.
-- Next action: owner final review, then open the PR (do not merge).
+- Next action: none for FOUND-001. Optional follow-up: resolve the ESLint 10 peer warnings.
