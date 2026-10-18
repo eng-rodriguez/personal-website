@@ -229,7 +229,18 @@ Explicitly not added: `tailwind.config.*`, `src/hooks/`, other `src/components/u
 - Preserved user edits: none
 - Revisions: 0
 - Approvals: story approved by owner; brief and ADR 0002 approved by owner (ADR Accepted)
-- Check evidence: none yet
+- Builder findings (react-builder, not committed):
+  - shadcn 4.21.1 targets Tailwind v4 and accepted 4.3.3. `components.json` style is `new-york` (also emits `rtl: false`, `prefix: ""`). `init button --base radix -t next --css-variables --no-rtl --no-pointer -y` worked in one step; `add` was not needed.
+  - The CLI wrote `import { cn } from "cn"` and `export { cn } from "cn"` (a third-party `cn` package) and `import { Slot } from "radix-ui"` (`Slot.Root`), and added `radix-ui` 1.8.1, `cn`, `lucide-react`, `shadcn`, `tw-animate-css`. Reinstalled D2 versions: `radix-ui` 1.6.7 (adds 1 direct dep; lockfile went from 504 to 614 node_modules entries in total, including Tailwind and its native optional packages), `class-variance-authority` 0.7.1, `clsx` 2.1.1, `tailwind-merge` 3.7.0, `tailwindcss`/`@tailwindcss/postcss` 4.3.3, `postcss` 8.5.23. Uninstalled `cn`, `lucide-react`, `shadcn`, `tw-animate-css`.
+  - Deviation: `src/lib/utils.ts` is hand-written as `cn = twMerge(clsx(inputs))` (the D2/section 2 form) and `button.tsx` imports `cn` from `@/lib/utils`, because the generated `cn` package is outside D2.
+  - Generated hover opacities 90/80/90 (as assumed). Sizes: default, xs, sm, lg, icon, icon-xs, icon-sm, icon-lg.
+  - CLI changes reverted/replaced: the generated globals.css (replaced per D5, dropped `tw-animate-css`/`shadcn/tailwind.css` imports, chart/sidebar tokens, `@custom-variant dark`, `.dark`). The CLI left `layout.tsx`, `page.tsx`, `tsconfig.json` and `next.config.ts` untouched.
+  - Token values changed from shadcn neutral (lightness only unless noted): light `--muted-foreground` 0.556 to 0.5; light `--input` 0.922 to 0.6; light `--ring` 0.708 to 0.6; light `--destructive` 0.577 0.245 to 0.55 0.22 (chroma lowered for sRGB gamut and for white text at 90% hover); dark `--destructive` chroma 0.191 to 0.185 (gamut); dark `--input` `oklch(1 0 0 / 15%)` to opaque `oklch(0.5 0 0)`. New `--destructive-foreground`: light `oklch(0.985 0 0)`, dark `oklch(0.145 0 0)`. Dark `--border` keeps its alpha (decorative, untested).
+  - `postcss.config.mjs` assigns the config to a `config` const before `export default`, because `import/no-anonymous-default-export` warns under `--max-warnings=0` (no lint exemption used).
+  - `rm -rf node_modules .next && npm ci --ignore-scripts` exit 0 with only the 3 ERESOLVE notices and no EBADENGINE; `npm run check` passes after it. Lockfile contains `@tailwindcss/oxide-linux-x64-gnu` and `lightningcss-linux-x64-gnu`.
+  - Built output: stylesheet contains `--color-background`, `text-muted-foreground`, `max-w-prose`; index.html has the class and `<meta name="color-scheme" content="light dark"/>`; no Google Fonts references. AC5 negative check failed as expected, naming `muted-foreground/muted` (light), then reverted.
+  - Manual verification (human steps 5 to 13) not run by the builder.
+- Check evidence: `npm run check` exit 0 (6 test files, 112 tests); `npm audit --audit-level=high --omit=dev` exit 0; `npm ls` exit 0
 - Repairs used: 0
 - Remaining blockers: none
 - Next action: factory:react-builder implements section 11
