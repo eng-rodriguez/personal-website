@@ -1,0 +1,10 @@
+.next/
+out/
+coverage/
+package-lock.json
+next-env.d.ts
+docs/
+.github/
+.factory.yml
+*.md
+.claude/
