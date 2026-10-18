@@ -1,11 +1,12 @@
 # .factory.yml — read by the factory hooks and orchestrators.
-# Chosen stack: Next.js (React). No application source exists yet, so no area is registered;
-# add it with the scaffold so hooks only run checks against a real package.json.
+# Approved stack: Next.js App Router, React, TypeScript (see CLAUDE.md). The application is intended
+# to live at the repository root unless a later approved decision changes it.
+# No application exists yet, so no area is registered: hooks only run checks against a real package.json.
 layout: monorepo
 default_branch: main
 areas: {}
-# TODO: register the site area when the Next.js app is scaffolded, e.g.
-#   web: { path: <TODO>, stack: nextjs }
-# TODO: record the project's complete local check command, run from the Git root.
-# commands:
-#   check: <TODO>
+# TODO: when the Next.js app is scaffolded, register it and its complete check in the same change, e.g.
+#   areas:
+#     web: { path: ., stack: <TODO> }
+#   commands:
+#     check: <TODO>
