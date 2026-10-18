@@ -168,7 +168,7 @@ Local checks run from the repository root on Node.js 24. "Built HTML" means `.ne
 | 7 | `layout.test.ts`. Built HTML: `index.html` contains `<title>Personal website</title>`, `writing.html` contains `<title>Writing · Personal website</title>`, both contain `<meta name="description"`, and no built HTML contains `og:url` or an absolute `canonical` link | local |
 | 8 | `site-footer.test.tsx`. Built `index.html` footer shows the build year. Owner read in manual step 9 | local + manual |
 | 9 | `npm run check` exit 0, recording Vitest file and test counts; `npm audit --audit-level=high --omit=dev` exit 0; `git diff --stat origin/main -- package.json package-lock.json` is empty | local |
-| 10 | Read `docs/design-system.md` "Global shell" and the CLAUDE.md Current state against section 10 | static |
+| 10 | `shell-docs.test.ts` checks the design-system "Global shell" section and the CLAUDE.md Current state; owner read in manual step 10 | local + manual |
 
 Edge cases: unknown route (`navigation.test.ts`, manual step 6 on `/missing`); trailing slash and query (`navigation.test.ts`); duplicate landmarks (AC1 tests and built HTML); menu state on navigation and back/forward (rerender test, manual step 4); resize across `md` (matchMedia test, manual step 5); no JavaScript (built HTML contains the links, manual step 5); forced colors and reduced motion (manual step 8); target size (`min-h-10` = 40px, manual step 4); zoom and 320px (manual step 6); contrast (no new pairs, `globals.test.ts` unchanged and passing); footer year (fake timers); no network calls (manual step 9); scope check (section 11).
 
@@ -191,7 +191,7 @@ Prerequisites: a fresh clone of `feat/found-003-build-global-shell`; Chrome or E
 10. Read `docs/design-system.md` and the CLAUDE.md Current state. Expected: the content in section 10. Covers AC10. Human only.
 11. Open the PR. Expected: `web`, `scope` and `ci-ok` succeed. Environment evidence; blocked until the PR exists.
 
-Rollback: revert the merge commit through a PR (section 12).
+Rollback: revert the merge commit through a PR (`git revert -m 1 <merge-sha>`, section 12), then re-run step 1. Expected: `/writing`, `/projects`, `/experience` and `/resume` return the framework 404 and the home page renders its own `main` again.
 
 ## 10. Docs impact and observability
 - `docs/design-system.md`: add a "Global shell" section:
@@ -233,6 +233,7 @@ Tests (factory:react-builder; also exempt from the scope check):
 - `src/components/site/site-nav.test.tsx` (new)
 - `src/components/site/site-shell.test.tsx` (new)
 - `src/components/site/site-footer.test.tsx` (new)
+- `src/components/site/shell-docs.test.ts` (new, AC10 doc check)
 - `src/app/layout.test.ts` (new)
 - `src/app/page.test.tsx` (modified)
 
@@ -261,34 +262,13 @@ Explicitly not changed: `package.json`, `package-lock.json`, `src/app/globals.cs
 - Resolved in this brief: in-flow disclosure rather than an overlay (D6); state reset on pathname change without an effect (D6); a document-level Escape listener (D6); no `not-found.tsx` (D8); no new tokens (D9).
 
 ## 14. Checkpoint
-- Phase: implementation complete, pending owner commit and manual verification
+- Phase: implementation, tests and reviews complete; awaiting owner final review and manual verification
 - Scope: FOUND-003 as in the approved story
 - Baseline: `origin/main` b67fb31a29f65c0bb91ec3c84ab80be8cc178080, clean tree; branch `feat/found-003-build-global-shell`
 - Revisions: 0
 - Approvals: story, brief and ADR 0003 approved by owner
-- Check evidence: `npm run check` exit 0 (typecheck, ESLint, Prettier, Vitest 11 files / 150 tests, build). Route table: `/`, `/writing`, `/projects`, `/experience`, `/resume` all static (○). Built HTML for all five routes: one `<main`, `id="main-content"`, `aria-label="Primary"`, `<footer`, five hrefs, no `og:url` or canonical; `index.html` title "Personal website", `writing.html` title "Writing · Personal website", both have a description meta; footer shows 2026. `npm audit --audit-level=high --omit=dev` exit 0. `package.json` and `package-lock.json` unchanged. Builder-verified (section 13): `next/link` renders in jsdom with only the `usePathname` mock (no extra mock); importing `layout.tsx` in a node-environment test works with Vitest's CSS stubbing; five routes build as static. Manual verification (section 9) not run by the builder.
+- Check evidence: `npm run check` exit 0 (typecheck, ESLint, Prettier, Vitest 12 files / 152 tests after the test pass, build). Route table: `/`, `/writing`, `/projects`, `/experience`, `/resume` all static (○). Built HTML for all five routes: one `<main`, `id="main-content"`, `aria-label="Primary"`, `<footer`, five hrefs, no `og:url` or canonical; `index.html` title "Personal website", `writing.html` title "Writing · Personal website", both have a description meta; footer shows 2026. `npm audit --audit-level=high --omit=dev` exit 0. `package.json` and `package-lock.json` unchanged. Builder-verified (section 13): `next/link` renders in jsdom with only the `usePathname` mock (no extra mock); importing `layout.tsx` in a node-environment test works with Vitest's CSS stubbing; five routes build as static. Manual verification (section 9) not run by the builder.
 - Repairs used: 0
 - Remaining blockers: none
-- Next action: owner reviews and commits; manual verification; open PR
-
-## Manual verification
-Added by the test agent. It complements the owner steps in section 9 and covers what jsdom cannot: real breakpoints, `:focus-visible`, forced colors, reduced motion, zoom, no-JS and the 404 page. Section 9 stays the source for steps that need no extra detail.
-
-Prerequisites: Node.js 24, a fresh clone of `feat/found-003-build-global-shell`, `npm ci`, Chrome or Edge with DevTools (device toolbar; Rendering panel for `prefers-color-scheme`, `forced-colors` and `prefers-reduced-motion` emulation).
-
-1. Build and serve: `npm run build && npm run start`, then open http://localhost:3000. Expected: the build route table lists `/`, `/writing`, `/projects`, `/experience`, `/resume` as static. Covers AC1, AC9.
-2. Built HTML: `for f in index writing projects experience resume; do echo $f $(grep -o '<main' .next/server/app/$f.html | wc -l); done`. Expected: 1 for each; `grep -o '<title>[^<]*' .next/server/app/writing.html` prints `Writing · Personal website`; `index.html` prints `Personal website`; `grep -l 'og:url\|rel="canonical"' .next/server/app/*.html` prints nothing. Covers AC1, AC7.
-3. Mobile at 375px (device toolbar). Expected: brand and a "Menu" button, no links visible. Click Menu: five links appear below the header row, the current page is bold and underlined. Click Writing: Writing loads with the menu closed. Reopen, press Escape: menu closes and Menu has focus. Reopen, click Menu: it closes. Open it, go to Projects, then Back and Forward: closed on each page. Links and Menu are 40px tall (inspect). Covers AC3, AC4, AC5.
-4. Desktop at 1280px, then exactly 768px. Expected: five inline links, no Menu button, the active link is bold and underlined on each of the five routes; at 768px the header fits or wraps without clipping. Open the menu at 375px, widen past 768px: inline links show, nothing stuck open; narrow again: closed. Covers AC1, AC2, AC4.
-5. No JavaScript: DevTools command menu, "Disable JavaScript", reload at 1280px. Expected: all five links visible and working. Re-enable JavaScript. Covers AC2 (server-rendered links).
-6. Zoom and 320px: at 1280px zoom to 200%, then set width to 320px at 100%. Expected: no horizontal scrollbar, no clipped brand or link. Covers the zoom edge case.
-7. 404: open http://localhost:3000/missing. Expected: header, footer and nav render, no link has an active style. Covers the unknown-route edge case (AC5).
-8. Focus, light theme: click the page background, press Tab. Expected: the first stop is a visible "Skip to main content" link; Enter moves focus to `main` (the next Tab does not return to the header); every header, nav and footer control shows an outline when reached by Tab, and mouse clicks show none. Covers AC6.
-9. Focus, dark theme: repeat step 8 with Rendering > `prefers-color-scheme: dark`. Expected: same behavior and the outline is visible against the dark background. Covers AC6.
-10. Forced colors: Rendering > `forced-colors: active`. Expected: the active link underline and the focus outline remain visible. Covers the forced-colors edge case (AC5, AC6).
-11. Reduced motion: Rendering > `prefers-reduced-motion: reduce`, hover nav links. Expected: color changes without a transition. Covers the reduced-motion edge case.
-12. Footer and network: read the footer on each route and watch the Network tab through steps 3 to 11. Expected: `© <current year> Personal website`, no email, phone or social link; only `localhost` is contacted. Covers AC8.
-13. Docs: read "Global shell" in `docs/design-system.md` and the CLAUDE.md Current state. Expected: shell, five routes, active link rule and mobile menu described. Covers AC10.
-14. Quality gates: `npm run check; echo $?` and `npm audit --audit-level=high --omit=dev; echo $?`. Expected: both exit 0. Covers AC9.
-
-Rollback check: the change has no flag. To roll back, revert the merge commit through a PR (`git revert -m 1 <merge-sha>`), then re-run step 1: the placeholder routes `/writing` etc. return the framework 404 and the home page renders its own `main`.
+- Reviews: implementation validator, design reviewer and security reviewer found no Critical or Important findings (gitleaks clean; semgrep not installed, manual SAST read)
+- Next action: owner final review; owner runs Manual verification (section 9); open PR
