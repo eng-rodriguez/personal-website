@@ -241,7 +241,6 @@ Explicitly not added: `tailwind.config.*`, `src/hooks/`, other `src/components/u
   - Built output: stylesheet contains `--color-background`, `text-muted-foreground`, `max-w-prose`; index.html has the class and `<meta name="color-scheme" content="light dark"/>`; no Google Fonts references. AC5 negative check failed as expected, naming `muted-foreground/muted` (light), then reverted.
   - Manual verification (human steps 5 to 13) not run by the builder.
 - Check evidence: `npm run check` exit 0 (6 test files, 112 tests); `npm audit --audit-level=high --omit=dev` exit 0; `npm ls` exit 0
-- Repairs used: 0
 - Test verification: every AC mapped to tests or Manual verification steps; no tests added; negative contrast check reproduced
 - Reviews (implementation-validator, design-reviewer, security-reviewer): 0 Critical, 0 Important, 6 Minor in scope (none fixed: generated `aria-invalid:ring-destructive/20` has no ring width; hand-maintained contrast pair lists; `.dark` regex check is coarse; duplicate "Installed versions" sentence in CLAUDE.md; `components.json` keeps `iconLibrary: lucide`; `radix-ui` umbrella brings 63 `@radix-ui/*` packages for `Slot` only)
 - Deferred unrelated: 5 high `braces` advisories in dev dependencies, identical at baseline 53d9d46 (`npm audit --package-lock-only`); production audit clean
