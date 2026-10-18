@@ -223,7 +223,7 @@ Explicitly not added: `tailwind.config.*`, `src/hooks/`, other `src/components/u
 - Resolved in this brief: oklch rather than hex (ADR 0002); no `tw-animate-css`, `lucide-react` or `user-event` (D2, D10); Button not rendered on the home page (D8).
 
 ## 14. Checkpoint
-- Phase: PR #37 open; manual verification run; awaiting owner sign-off on palette, forced colors and reduced motion
+- Phase: shipped; PR #37 merged 2026-10-18 as 10abd11
 - Scope: FOUND-002 as in the approved story
 - Baseline: `main` 53d9d46 (clean); branch `feat/found-002-establish-design-system`
 - Preserved user edits: none
@@ -260,5 +260,6 @@ Explicitly not added: `tailwind.config.*`, `src/hooks/`, other `src/components/u
   - 13 passed: on PR #37, `web`, `scope`, `secrets`, `changes`, `pr-format` and `ci-ok` passed; `workflows` skipped (no `.github/` change).
 - New Minor finding (in scope): Tailwind v4 automatic source detection scans `docs/`, so class names quoted in the ADR, brief and design-system doc (`dark:bg-input/30`, `dark:border-input`, `ring-[3px]`, `text-9xl` and others) are emitted into the production CSS as unused rules. No element uses them. Fixed: `@source not "../../docs";` in `globals.css` with a structure test; `npm run check` exit 0 (6 files, 113 tests), built CSS 19,782 to 16,554 bytes with no `dark:`, `ring-[3px]` or `text-9xl` rules.
 - Repairs used: 1 (Minor, owner-approved path)
-- Remaining blockers: owner checks for steps 8 and 9, palette sign-off (step 10) and docs read (step 12)
-- Next action: owner completes steps 8, 9, 10 (palette) and 12, then merges
+- Owner confirmed on 2026-10-18 that the remaining checks were done (steps 8, 9, palette sign-off in step 10, and step 12) before merging; individual results were not itemized
+- Remaining blockers: none
+- Next action: none; FOUND-002 issue closed
