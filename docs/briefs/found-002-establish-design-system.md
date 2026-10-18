@@ -259,6 +259,7 @@ Explicitly not added: `tailwind.config.*`, `src/hooks/`, other `src/components/u
   - 11 done: the clone was discarded; this checkout was not modified.
   - 12 passed for structure: `docs/design-system.md` has every section 10 topic. Owner read pending.
   - 13 passed: on PR #37, `web`, `scope`, `secrets`, `changes`, `pr-format` and `ci-ok` passed; `workflows` skipped (no `.github/` change).
-- New Minor finding (in scope): Tailwind v4 automatic source detection scans `docs/`, so class names quoted in the ADR, brief and design-system doc (`dark:bg-input/30`, `dark:border-input`, `ring-[3px]`, `text-9xl` and others) are emitted into the production CSS as unused rules. No element uses them. Fix option: `@source not "../../docs";` in `globals.css`.
+- New Minor finding (in scope): Tailwind v4 automatic source detection scans `docs/`, so class names quoted in the ADR, brief and design-system doc (`dark:bg-input/30`, `dark:border-input`, `ring-[3px]`, `text-9xl` and others) are emitted into the production CSS as unused rules. No element uses them. Fixed: `@source not "../../docs";` in `globals.css` with a structure test; `npm run check` exit 0 (6 files, 113 tests), built CSS 19,782 to 16,554 bytes with no `dark:`, `ring-[3px]` or `text-9xl` rules.
+- Repairs used: 1 (Minor, owner-approved path)
 - Remaining blockers: owner checks for steps 8 and 9, palette sign-off (step 10) and docs read (step 12)
-- Next action: owner completes the remaining checks and decides on the Tailwind source Minor finding, then merges
+- Next action: owner completes steps 8, 9, 10 (palette) and 12, then merges
