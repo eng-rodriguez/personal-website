@@ -1,0 +1,12 @@
+# .factory.yml — read by the factory hooks and orchestrators.
+# Approved stack: Next.js App Router, React, TypeScript (see CLAUDE.md). The application is intended
+# to live at the repository root unless a later approved decision changes it.
+# No application exists yet, so no area is registered: hooks only run checks against a real package.json.
+layout: monorepo
+default_branch: main
+areas: {}
+# TODO: when the Next.js app is scaffolded, register it and its complete check in the same change, e.g.
+#   areas:
+#     web: { path: ., stack: <TODO> }
+#   commands:
+#     check: <TODO>
