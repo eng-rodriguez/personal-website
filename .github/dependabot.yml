@@ -1,0 +1,5 @@
+# .github/dependabot.yml — add an npm entry for the Next.js app's directory once it is scaffolded.
+# GitHub Actions majors stay enabled: actions are pinned to SHAs and each update is reviewed.
+version: 2
+updates:
+  - { package-ecosystem: github-actions, directory: /, schedule: { interval: weekly }, groups: { actions: { patterns: ["*"] } }, commit-message: { prefix: ci } }
