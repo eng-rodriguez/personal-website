@@ -183,15 +183,24 @@ Explicitly not added: `public/`, `src/app/favicon.ico`, `src/app/page.module.css
 - Builder-verified at implementation (record results in the Checkpoint): the TypeScript version chosen under D3, the ESLint major under D4, the jest-dom 7 `vitest` export path, whether `--ignore-scripts` works (D18), the setup-node SHA-to-tag mapping, and whether `next typegen` exists in 16.4.2.
 
 ## 14. Checkpoint
-- Phase: brief approved; builders pending
+- Phase: step 1 (application) implemented; pipeline step pending
 - Scope: FOUND-001 as in the approved story; CI web job and Dependabot npm entry included by owner decision
 - Baseline: `origin/main` b9b9b13; current revision: n/a (branch not created)
 - Preserved user edits: `docs/stories/found-001-initialize-nextjs-app.md` (untracked, approved story)
 - Revisions: 0
 - Approvals: story approved by owner (CI web job and Dependabot npm included); brief approved by owner with `npm audit` added to the web job
-- Check evidence: none yet
-- Builder-verified decisions: pending (D3, D4, D5 tsconfig paths, D11, D18)
+- Check evidence (step 1, Node 24.19.0 / npm 11.17.0): `rm -rf node_modules .next && npm ci --ignore-scripts && npm run check` exit 0; typecheck, lint, format:check, test (1 file, 1 test passed), build each exit 0; `npm ls` exit 0 (no invalid or missing peers); `npm audit --audit-level=high --omit=dev` exit 0 (0 vulnerabilities). AC5 negative check: a type error in `src/lib/site.ts` made `npm run check` exit 2 at typecheck; reverted.
+- Builder-verified decisions:
+  - D3 TypeScript: `~6.0.3` (installed 6.0.3). typescript-eslint 8.71.2 peer range is `>=4.8.4 <6.1.0`; 7.x is outside it.
+  - D4 ESLint: 10.13.0. `eslint-config-next@16.4.2` peer is `>=9.0.0`. Install had ERESOLVE "overriding peer dependency" notices only; no error and `npm ls` is clean.
+  - D5 tsconfig paths: Vite supports `resolve.tsconfigPaths` natively (the plugin warned about it), so `vite-tsconfig-paths` was left out and `vitest.config.mts` sets `resolve: { tsconfigPaths: true }`. `@testing-library/dom` is `^10.4.1` (installed 10.4.2).
+  - D11 jest-dom 7: `@testing-library/jest-dom/vitest` import works.
+  - D18 `--ignore-scripts`: `npm ci --ignore-scripts && npm run check` passes. Only `unrs-resolver` has an install script; it is not needed. Keep `--ignore-scripts` in CI.
+  - `next typegen` exists in 16.4.2 and runs standalone ("Generating route types").
+  - setup-node SHA `49933ea5288caeca8642d1e84afbd3f7d6820020` resolves to tags `v4` and `v4.4.0` (git ls-remote).
+  - Deviations: `.claude/` added to `.prettierignore` (local-only `.claude/settings.local.json` is ignored by the owner's global git ignore, not the repo, and failed `format:check`); the generated `cacheComponents` and `partialPrefetching` options were dropped from `next.config.ts` per D15.
+  - `npm audit` (all deps) reports 5 high advisories (braces chain via `eslint-config-next` > `@next/eslint-plugin-next` > `fast-glob`). Dev-only, none in production deps; left for Dependabot.
 - Manual verification: pending
 - Repairs used: 0
 - Remaining blockers: none
-- Next action: factory:react-builder runs step 1
+- Next action: factory:pipeline-builder runs step 2
