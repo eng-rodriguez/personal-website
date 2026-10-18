@@ -7,6 +7,8 @@
  * .dark class.
  */
 @import "tailwindcss";
+/* Class names quoted in planning docs must not reach the production CSS. */
+@source not "../../docs";
 
 :root {
   color-scheme: light dark;

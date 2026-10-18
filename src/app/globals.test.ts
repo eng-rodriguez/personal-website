@@ -154,6 +154,12 @@ describe("globals.css structure", () => {
     expect(css.replace(/\/\*[\s\S]*?\*\//g, "")).not.toMatch(/\.dark\b/);
   });
 
+  it("excludes docs from Tailwind source detection", () => {
+    expect(atRules("source").map((n) => n.params)).toContain(
+      'not "../../docs"',
+    );
+  });
+
   it("declares color-scheme light dark on :root", () => {
     expect(light.get("color-scheme")).toBe("light dark");
   });
