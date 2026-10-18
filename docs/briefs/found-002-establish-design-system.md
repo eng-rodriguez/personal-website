@@ -223,13 +223,13 @@ Explicitly not added: `tailwind.config.*`, `src/hooks/`, other `src/components/u
 - Resolved in this brief: oklch rather than hex (ADR 0002); no `tw-animate-css`, `lucide-react` or `user-event` (D2, D10); Button not rendered on the home page (D8).
 
 ## 14. Checkpoint
-- Phase: brief approved; implementation (factory:react-builder) next
+- Phase: implemented (d7ad8c8), tests verified, reviews done; awaiting owner final review
 - Scope: FOUND-002 as in the approved story
 - Baseline: `main` 53d9d46 (clean); branch `feat/found-002-establish-design-system`
 - Preserved user edits: none
 - Revisions: 0
 - Approvals: story approved by owner; brief and ADR 0002 approved by owner (ADR Accepted)
-- Builder findings (react-builder, not committed):
+- Builder findings (react-builder, committed in d7ad8c8):
   - shadcn 4.21.1 targets Tailwind v4 and accepted 4.3.3. `components.json` style is `new-york` (also emits `rtl: false`, `prefix: ""`). `init button --base radix -t next --css-variables --no-rtl --no-pointer -y` worked in one step; `add` was not needed.
   - The CLI wrote `import { cn } from "cn"` and `export { cn } from "cn"` (a third-party `cn` package) and `import { Slot } from "radix-ui"` (`Slot.Root`), and added `radix-ui` 1.8.1, `cn`, `lucide-react`, `shadcn`, `tw-animate-css`. Reinstalled D2 versions: `radix-ui` 1.6.7 (adds 1 direct dep; lockfile went from 504 to 614 node_modules entries in total, including Tailwind and its native optional packages), `class-variance-authority` 0.7.1, `clsx` 2.1.1, `tailwind-merge` 3.7.0, `tailwindcss`/`@tailwindcss/postcss` 4.3.3, `postcss` 8.5.23. Uninstalled `cn`, `lucide-react`, `shadcn`, `tw-animate-css`.
   - Deviation: `src/lib/utils.ts` is hand-written as `cn = twMerge(clsx(inputs))` (the D2/section 2 form) and `button.tsx` imports `cn` from `@/lib/utils`, because the generated `cn` package is outside D2.
@@ -242,5 +242,8 @@ Explicitly not added: `tailwind.config.*`, `src/hooks/`, other `src/components/u
   - Manual verification (human steps 5 to 13) not run by the builder.
 - Check evidence: `npm run check` exit 0 (6 test files, 112 tests); `npm audit --audit-level=high --omit=dev` exit 0; `npm ls` exit 0
 - Repairs used: 0
-- Remaining blockers: none
-- Next action: factory:react-builder implements section 11
+- Test verification: every AC mapped to tests or Manual verification steps; no tests added; negative contrast check reproduced
+- Reviews (implementation-validator, design-reviewer, security-reviewer): 0 Critical, 0 Important, 6 Minor in scope (none fixed: generated `aria-invalid:ring-destructive/20` has no ring width; hand-maintained contrast pair lists; `.dark` regex check is coarse; duplicate "Installed versions" sentence in CLAUDE.md; `components.json` keeps `iconLibrary: lucide`; `radix-ui` umbrella brings 63 `@radix-ui/*` packages for `Slot` only)
+- Deferred unrelated: 5 high `braces` advisories in dev dependencies, identical at baseline 53d9d46 (`npm audit --package-lock-only`); production audit clean
+- Remaining blockers: Manual verification steps 5 to 13 (human; step 13 needs the PR)
+- Next action: owner final review, then commit closing notes, push and open the PR
