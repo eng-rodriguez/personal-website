@@ -262,7 +262,7 @@ Explicitly not changed: `package.json`, `package-lock.json`, `src/app/globals.cs
 - Resolved in this brief: in-flow disclosure rather than an overlay (D6); state reset on pathname change without an effect (D6); a document-level Escape listener (D6); no `not-found.tsx` (D8); no new tokens (D9).
 
 ## 14. Checkpoint
-- Phase: implementation, tests and reviews complete; awaiting owner final review and manual verification
+- Phase: PR open (eng-rodriguez/personal-website#39); manual verification done; awaiting merge
 - Scope: FOUND-003 as in the approved story
 - Baseline: `origin/main` b67fb31a29f65c0bb91ec3c84ab80be8cc178080, clean tree; branch `feat/found-003-build-global-shell`
 - Revisions: 0
@@ -271,4 +271,14 @@ Explicitly not changed: `package.json`, `package-lock.json`, `src/app/globals.cs
 - Repairs used: 0
 - Remaining blockers: none
 - Reviews: implementation validator, design reviewer and security reviewer found no Critical or Important findings (gitleaks clean; semgrep not installed, manual SAST read)
-- Next action: owner final review; owner runs Manual verification (section 9); open PR
+- Manual verification (section 9), 2026-10-18, production build (`npm run start`) in the desktop app's built-in Chromium browser with viewport and `prefers-color-scheme` emulation:
+  - Step 1: fresh `npm ci` (3 known `ERESOLVE` notices) then `npm run check` exit 0, 12 files / 152 tests. Step 2: audit exit 0.
+  - Step 3: built HTML for all five routes has one `main`, one "Primary" nav and one footer; titles "Personal website" and "<Section> · Personal website"; description meta present; no `og:url` or canonical.
+  - Step 4 (375px): Menu button 40px, `aria-expanded="false"`, no links visible; open shows five 40px links with Home underlined and semibold (`aria-current="page"`); choosing Writing loads it closed with Writing active; Escape closes and focuses Menu; toggle closes; open, Projects, Back, Forward: closed each time with the right link active.
+  - Step 5: 1280px shows five inline links and no Menu on each route; the server HTML for each route marks exactly the matching link; 768px fits on one 73px row with no clipping; menu open at 375px, widen to 1280px: closes, inline links show; narrow again: closed. The server-rendered HTML contains every link, which covers the no-JS case (not run with JavaScript disabled in the browser).
+  - Step 6: 320px and 640px (the layout width of 1280px at 200% zoom): no horizontal scroll, nothing clipped, menu open fits. `/missing` renders the framework 404 inside the header and footer with no active link (the default 404 fills the viewport height, so the footer sits below the fold).
+  - Step 7 (light and dark): first Tab stop is the visible "Skip to main content"; Enter focuses `main#main-content` (with the global outline); every header and nav control shows a 2px solid ring outline on keyboard focus, settling after the 150ms `transition-colors` fade; a mouse click on Menu shows no outline. The placeholder pages and footer have no focusable content, so Tab after the skip wraps to the skip link. VoiceOver not run.
+  - Step 8: forced colors and reduced motion were not emulated by the tools; the CSS has no `forced-colors` overrides (underline and solid outline are system-rendered) and has the `motion-reduce` rule. Owner checked the site and reported it looks good.
+  - Step 9: only `localhost:3000` was contacted; footer reads "© 2026 Personal website" with no links. Step 10: covered by `shell-docs.test.ts` and the implementation validator; owner reported it looks good.
+  - Step 11: PR #39 checks `changes`, `secrets`, `scope`, `web`, `pr-format` and `ci-ok` pass; `workflows` skipped (no `.github/` change).
+- Next action: owner merges PR #39; then the closing notes are updated to Shipped
