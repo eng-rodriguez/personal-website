@@ -2,7 +2,7 @@
 
 **Status:** Ready for review
 **Date:** 2026-10-19 · **Milestone:** none · **Risk:** Standard
-**Links:** Ticket [FOUND-005](https://github.com/eng-rodriguez/personal-website/issues/5) · [Story](../stories/found-005-engineering-quality-gates.md) · [Brief](../briefs/found-005-engineering-quality-gates.md) · [PR](pending)
+**Links:** Ticket [FOUND-005](https://github.com/eng-rodriguez/personal-website/issues/5) · [Story](../stories/found-005-engineering-quality-gates.md) · [Brief](../briefs/found-005-engineering-quality-gates.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/43)
 
 ## What we delivered
 Every proposed change already went through code style, type, unit test and build checks. It now also gets quick browser tests: a real browser opens the five main pages, checks that each one shows its heading, title and menu, switches the site to the dark look and confirms it is remembered, and checks the pages still work with JavaScript turned off. If a browser test fails, a report showing what went wrong is kept for a week. The checks and how to run them are now written down.
