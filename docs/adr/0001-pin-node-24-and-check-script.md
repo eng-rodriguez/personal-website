@@ -1,6 +1,6 @@
 # 0001. Pin Node 24 and check script
 
-- Status: Accepted
+- Status: Accepted; the deferred Playwright part (where `e2e` runs) is superseded by [ADR 0005](0005-playwright-smoke-tests-outside-check.md)
 - Date: 2026-10-18
 - Deciders: Josue Rodriguez (@eng-rodriguez)
 - Related: [FOUND-001 story](../stories/found-001-initialize-nextjs-app.md), [FOUND-001 brief](../briefs/found-001-initialize-nextjs-app.md), https://github.com/eng-rodriguez/personal-website/issues/1
