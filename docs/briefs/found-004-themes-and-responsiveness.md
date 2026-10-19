@@ -69,7 +69,7 @@ None. No route handlers, server actions, cookies, headers or API artifacts.
   5. `@media screen and (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { dark tokens } }`: System or no JavaScript, with the OS dark.
   6. `@media screen { :root[data-theme="dark"] { color-scheme: dark; dark tokens } }`: explicit Dark. Its token declarations are character-for-character the same as block 5.
   7. `@media print { :root { color-scheme: light; } }`. Dark tokens exist only under `screen`, so print gets the `:root` light tokens whatever the choice (AC14).
-  8. `@theme inline`, `@theme` and `@layer base` (unchanged), plus one base rule: `html:not([data-js]) [data-theme-toggle] { display: none; }` (D7).
+  8. `@theme inline`, `@theme` and `@layer base` (unchanged), plus one unlayered rule after the base layer (utilities outrank `@layer base`): `html:not([data-js]) [data-theme-toggle] { display: none; }` (D7).
 
   | State | Tokens | `color-scheme` |
   | --- | --- | --- |
@@ -156,7 +156,7 @@ Tests follow the `test_acN_` naming. jsdom applies neither media queries nor Tai
   - Structure: exactly one `@custom-variant` with params `dark`, whose body contains `prefers-color-scheme: dark`, `[data-theme="dark"]` and `:not([data-theme="light"])`. Still no `.dark` selector and no `tw-animate-css`. `:root` keeps `color-scheme: light dark`. `:root[data-theme="light"]` sets `color-scheme: light`. The explicit dark rule sets `color-scheme: dark`. `@media print` contains a `:root` rule with `color-scheme: light` and no color token declarations.
   - Locate `osDarkRoot` (`:root:not([data-theme="light"])` inside the media query `screen and (prefers-color-scheme: dark)`, compared with whitespace removed) and `explicitDarkRoot` (`:root[data-theme="dark"]` inside `@media screen`). Both exist. Their color token maps are equal (ignoring `color-scheme`), and each declares exactly `COLOR_TOKENS`.
   - Every rule in the file that declares a dark token value sits inside a media query starting with `screen`, so print cannot pick up dark values.
-  - The base layer contains `html:not([data-js]) [data-theme-toggle]` with `display: none`.
+  - An unlayered (not inside any `@layer`) rule `html:not([data-js]) [data-theme-toggle]` has `display: none`.
   - `themes` for the gamut and contrast `describe.each` becomes three entries: `light`, `dark (OS)` and `dark (explicit)`. `TEXT_PAIRS`, `HOVER_PAIRS` and the 3:1 checks run unchanged for each (AC8).
 - **`src/app/layout.test.ts`** (modified, still `// @vitest-environment node`): calling `RootLayout({ children: null })` returns an `html` element with `lang="en"` and `suppressHydrationWarning: true`. Its children include, before `body`, a `head` whose only child is a `script` with `dangerouslySetInnerHTML.__html === themeScript`, or the body-first placement if D2's fallback was used. `viewport.colorScheme` is `"light dark"`. Existing metadata tests are unchanged.
 - **`src/components/site/shell-docs.test.ts`** (modified): add assertions that the `## Themes` section of `docs/design-system.md` contains `site-theme`, `data-theme`, `data-js`, `System`, `localStorage` and `print`. The `## Breakpoints` section contains `48rem` and `320px`. CLAUDE.md contains `ADR 0004` and `src/lib/theme.ts`. Existing assertions stay.

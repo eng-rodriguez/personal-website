@@ -154,9 +154,6 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
-  html:not([data-js]) [data-theme-toggle] {
-    display: none;
-  }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
   }
@@ -170,4 +167,9 @@
       scroll-behavior: auto !important;
     }
   }
+}
+
+/* Unlayered on purpose: utilities (inline-flex) outrank @layer base. */
+html:not([data-js]) [data-theme-toggle] {
+  display: none;
 }

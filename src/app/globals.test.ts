@@ -243,6 +243,8 @@ describe("globals.css structure", () => {
       if (r.selector === "html:not([data-js]) [data-theme-toggle]") found = r;
     });
     expect(found && declarations(found).get("display")).toBe("none");
+    // Utilities (inline-flex) outrank @layer base, so the rule must be unlayered.
+    expect(found?.parent).toBe(root);
   });
 });
 
