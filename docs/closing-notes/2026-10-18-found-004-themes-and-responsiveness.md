@@ -2,7 +2,7 @@
 
 **Status:** Ready for review
 **Date:** 2026-10-18 · **Milestone:** none · **Risk:** Standard
-**Links:** Ticket [FOUND-004](https://github.com/eng-rodriguez/personal-website/issues/4) · [Story](../stories/found-004-themes-and-responsiveness.md) · [Brief](../briefs/found-004-themes-and-responsiveness.md) · PR: not opened yet
+**Links:** Ticket [FOUND-004](https://github.com/eng-rodriguez/personal-website/issues/4) · [Story](../stories/found-004-themes-and-responsiveness.md) · [Brief](../briefs/found-004-themes-and-responsiveness.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/41)
 
 ## What we delivered
 The site still follows the visitor's device setting for light or dark by default. A new Theme control in the header now lets visitors pick System, Light or Dark. The choice is remembered on that browser, applied before the page first appears so it does not flash the wrong look, and shared between open tabs. Printed pages always use the light look. The supported screen widths, from 320 pixels upward, are now written down.
