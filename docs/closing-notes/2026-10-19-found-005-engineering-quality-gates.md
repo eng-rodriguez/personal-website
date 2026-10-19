@@ -21,7 +21,7 @@ A change that breaks a main page or the theme choice is now caught before it rea
 
 ## Risks and decisions
 - Decision recorded: browser tests run separately from the quick local check ([ADR 0005](../adr/0005-playwright-smoke-tests-outside-check.md)).
-- The owner should confirm that GitHub requires the combined "ci-ok" result before merging.
+- GitHub requires the combined "ci-ok" result before merging (confirmed on the main branch rules).
 - No leadership input needed.
 
 ## What's next
