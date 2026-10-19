@@ -243,7 +243,7 @@ Explicitly not changed: everything under `src/` except `src/scaffold.test.ts`, p
 - Follow-up, not this story: capture console and page errors (such as hydration warnings) in smoke tests; accessibility scanning; a Vercel preview target after the deployment decision; a `cooldown` for `github-actions` in Dependabot (from the PR 34 review).
 
 ## 14. Checkpoint
-- Phase: step 1 (tooling, tests, docs) built; step 2 (pipeline) next
+- Phase: built, verified and reviewed; awaiting owner final review before the PR
 - Scope: FOUND-005 as in the approved story (assumptions A1 to A7 and the Decisions section)
 - Baseline: `origin/main` ca694e1; feature branch `feat/found-005-engineering-quality-gates` to be cut from it. The current working tree is `docs/found-004-ship-notes` (a76d6c4), which predates ca694e1.
 - Preserved user edits: untracked `AGENTS.md` and `docs/reviews/dependabot-actions-pr-34.md` are not touched and not committed with this story.
@@ -262,4 +262,5 @@ Explicitly not changed: everything under `src/` except `src/scaffold.test.ts`, p
   - test-verifier (2026-10-19, Node 24.19.0): `npm run check` exit 0, 14 files and 236 tests; `npm run e2e` exit 0, 11 passed (about 5 s warm); `CI=1 npm run e2e` exit 0, 11 passed; `npm audit --audit-level=high --omit=dev` exit 0; actionlint exit 0; `zizmor --min-severity medium --format plain .github/workflows` exit 0 (no findings, 10 suppressed); no `uses:` line without a 40-character SHA; local scope loop prints no error. `lsof -nP -iTCP:3100 -sTCP:LISTEN` empty after each run; `git status` shows no output folders (they are listed as ignored); `npm run lint` and `npm run format:check` exit 0 with the folders present.
   - AC12 and AC6 local proof: with the `h1` removed from `src/app/writing/page.tsx`, `CI=1 npm run e2e` exited 1 (1 failed, 10 passed). The `/writing renders the shell, title and current nav item` test failed on the first attempt and on `retry #1` with `Error: /writing h1`, `toHaveCount` Expected 1, Received 0. `playwright-report/index.html` and `test-results/.../-retry1/trace.zip` were written. File restored with `git checkout`, `git status` shows only the two untracked files. `show-report` was not launched (it starts a server); the report folder has `index.html` and `data/`. CI artifact upload remains unverified.
 - Repairs used: 0
-- Next action: react-builder (section 1, step 1), then pipeline-builder (step 2)
+- Reviews (2026-10-19, HEAD a1e1632): implementation-validator, design-reviewer and security-reviewer found no Critical or Important findings; Minor findings only (stale checkpoint and `docs/testing.md` table width fixed, public-artifact note added to `docs/testing.md`; others reported, not changed). gitleaks on the diff range: no leaks.
+- Next action: owner final review, then commit the closing notes, push and open the PR

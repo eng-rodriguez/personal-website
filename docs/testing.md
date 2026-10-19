@@ -4,15 +4,15 @@ Decision record: [ADR 0005](adr/0005-playwright-smoke-tests-outside-check.md).
 
 ## Gates
 
-| Gate       | Command                                  | Local                | CI job  |
-| ---------- | ---------------------------------------- | -------------------- | ------- |
-| Typecheck  | `npm run typecheck`                      | `npm run check`      | `web`   |
-| ESLint     | `npm run lint` (`--max-warnings=0`)      | `npm run check`      | `web`   |
-| Prettier   | `npm run format:check`                   | `npm run check`      | `web`   |
-| Vitest     | `npm test`                               | `npm run check`      | `web`   |
-| Build      | `npm run build`                          | `npm run check`      | `web`   |
-| Audit      | `npm audit --audit-level=high --omit=dev` | not in `check`       | `web`   |
-| Playwright | `npm run e2e`                            | `npm run e2e` only   | `e2e`   |
+| Gate       | Command                                   | Local              | CI job |
+| ---------- | ----------------------------------------- | ------------------ | ------ |
+| Typecheck  | `npm run typecheck`                       | `npm run check`    | `web`  |
+| ESLint     | `npm run lint` (`--max-warnings=0`)       | `npm run check`    | `web`  |
+| Prettier   | `npm run format:check`                    | `npm run check`    | `web`  |
+| Vitest     | `npm test`                                | `npm run check`    | `web`  |
+| Build      | `npm run build`                           | `npm run check`    | `web`  |
+| Audit      | `npm audit --audit-level=high --omit=dev` | not in `check`     | `web`  |
+| Playwright | `npm run e2e`                             | `npm run e2e` only | `e2e`  |
 
 The `ci-ok` job aggregates every CI job and is the single required result.
 
@@ -33,7 +33,7 @@ Run `npx playwright install chromium` once per Playwright version (add `--with-d
 
 ## Reading a CI failure
 
-Download the `playwright-report-<attempt>` artifact from the run summary and unzip it. Run `npx playwright show-report <dir>`, then open the trace of the retried test (`npx playwright show-trace`). CI retries once; a test that passes on retry is shown as flaky.
+Download the `playwright-report-<attempt>` artifact from the run summary and unzip it. Run `npx playwright show-report <dir>`, then open the trace of the retried test (`npx playwright show-trace`). CI retries once; a test that passes on retry is shown as flaky. The repository is public, so anyone signed in to GitHub can download the artifact for its 7-day retention; it holds page snapshots and test sources only.
 
 ## Adding a smoke test
 
