@@ -13,7 +13,24 @@ const eslintConfig = defineConfig([
     "build/**",
     "coverage/**",
     "next-env.d.ts",
+    "playwright-report/**",
+    "test-results/**",
+    "blob-report/**",
+    "playwright/.cache/**",
   ]),
+  {
+    files: ["e2e/**/*.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "CallExpression[callee.type='MemberExpression'][callee.property.name=/^(only|skip|fixme)$/]",
+          message: "Do not merge focused or skipped smoke tests.",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

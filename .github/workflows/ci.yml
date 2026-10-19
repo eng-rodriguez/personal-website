@@ -1,5 +1,5 @@
 # ci.yml — pull request gates. Free tooling only: no GitHub Advanced Security features. Actions are pinned; review updates in the factory before copying.
-# The `web` job runs the complete local check (`npm run check`) plus a dependency audit; container/infra jobs are added when those stacks exist.  `ci-ok` is the single job to require if your repo uses required checks.
+# The `web` job runs the complete local check (`npm run check`) plus a dependency audit; the `e2e` job runs the Playwright smoke tests (`npm run e2e`) against a fresh production build and uploads the report only on failure; container/infra jobs are added when those stacks exist.  `ci-ok` is the single job to require if your repo uses required checks.
 name: ci
 on:
   pull_request:
@@ -98,9 +98,34 @@ jobs:
       - run: npm audit --audit-level=high --omit=dev
       - run: npm run check
 
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
   ci-ok:
     if: always()
-    needs: [changes, secrets, workflows, scope, web]
+    needs: [changes, secrets, workflows, scope, web, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
