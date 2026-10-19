@@ -1,7 +1,7 @@
 # Visitors can choose a light or dark look, and the site remembers it
 
-**Status:** Ready for review
-**Date:** 2026-10-18 · **Milestone:** none · **Risk:** Standard
+**Status:** Shipped
+**Date:** 2026-10-19 · **Milestone:** none · **Risk:** Standard
 **Links:** Ticket [FOUND-004](https://github.com/eng-rodriguez/personal-website/issues/4) · [Story](../stories/found-004-themes-and-responsiveness.md) · [Brief](../briefs/found-004-themes-and-responsiveness.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/41)
 
 ## What we delivered
@@ -14,7 +14,7 @@ Readers can pick the look that is most comfortable for them, and the site stays 
 - All 235 automated tests passed, and the full check (type checks, code style, tests and a production build) passed. The dependency security audit passed.
 - Every acceptance criterion has an automated test or check. Color contrast is tested for light, device-driven dark and chosen dark.
 - Three independent reviews (requirements, design and security) found one important issue: with JavaScript off, the hidden Theme control still left an empty gap in the header. It was fixed and re-reviewed. Four minor notes were left open.
-- Not yet checked by hand: how the site really looks on first load, narrow screens and zoom, keyboard and screen-reader use, high-contrast mode and printing. These steps are in the brief for the owner to run.
+- Most hands-on checks were run in a browser after review: the remembered choice, no wrong-theme flash on load, keyboard use, narrow screens and zoom, two open tabs, the page without JavaScript, and no outside connections. Printing, high-contrast mode and screen readers were not tested directly.
 
 ## Not included / deferred
 - Automated browser testing, a security policy for page scripts, and any new colors.
@@ -25,4 +25,4 @@ Readers can pick the look that is most comfortable for them, and the site stays 
 - No leadership input needed.
 
 ## What's next
-- Owner runs the manual checks, then the pull request is reviewed and merged.
+- Next story: the content pipeline for articles and projects.
