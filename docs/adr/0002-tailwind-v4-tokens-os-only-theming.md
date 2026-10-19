@@ -1,6 +1,6 @@
 # 0002. Tailwind v4 tokens, OS-only theming
 
-- Status: Accepted
+- Status: Accepted; the OS-only theming parts are superseded by [ADR 0004](0004-theme-choice-with-pre-paint-script.md)
 - Date: 2026-10-18
 - Deciders: Josue Rodriguez (@eng-rodriguez)
 - Related: [FOUND-002 story](../stories/found-002-establish-design-system.md), [FOUND-002 brief](../briefs/found-002-establish-design-system.md), https://github.com/eng-rodriguez/personal-website/issues/2
