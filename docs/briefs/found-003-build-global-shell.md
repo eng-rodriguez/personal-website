@@ -262,7 +262,7 @@ Explicitly not changed: `package.json`, `package-lock.json`, `src/app/globals.cs
 - Resolved in this brief: in-flow disclosure rather than an overlay (D6); state reset on pathname change without an effect (D6); a document-level Escape listener (D6); no `not-found.tsx` (D8); no new tokens (D9).
 
 ## 14. Checkpoint
-- Phase: PR open (eng-rodriguez/personal-website#39); manual verification done; awaiting merge
+- Phase: shipped; PR eng-rodriguez/personal-website#39 merged to `main` as 5fde387 on 2026-10-18
 - Scope: FOUND-003 as in the approved story
 - Baseline: `origin/main` b67fb31a29f65c0bb91ec3c84ab80be8cc178080, clean tree; branch `feat/found-003-build-global-shell`
 - Revisions: 0
@@ -281,4 +281,4 @@ Explicitly not changed: `package.json`, `package-lock.json`, `src/app/globals.cs
   - Step 8: forced colors and reduced motion were not emulated by the tools; the CSS has no `forced-colors` overrides (underline and solid outline are system-rendered) and has the `motion-reduce` rule. Owner checked the site and reported it looks good.
   - Step 9: only `localhost:3000` was contacted; footer reads "© 2026 Personal website" with no links. Step 10: covered by `shell-docs.test.ts` and the implementation validator; owner reported it looks good.
   - Step 11: PR #39 checks `changes`, `secrets`, `scope`, `web`, `pr-format` and `ci-ok` pass; `workflows` skipped (no `.github/` change).
-- Next action: owner merges PR #39; then the closing notes are updated to Shipped
+- Next action: none
