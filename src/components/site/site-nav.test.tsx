@@ -153,3 +153,17 @@ describe("SiteNav targets and focus", () => {
     }
   });
 });
+
+describe("SiteNav actions", () => {
+  it("test_ac10_renders_actions_before_the_menu_button_in_a_wrapping_cluster", () => {
+    render(<SiteNav actions={<span data-testid="action">Action</span>} />);
+
+    const action = screen.getByTestId("action");
+    expect(
+      action.compareDocumentPosition(toggle()) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(action.parentElement).toBe(toggle().parentElement);
+    expect(toggle().parentElement).toHaveClass("flex-wrap");
+  });
+});

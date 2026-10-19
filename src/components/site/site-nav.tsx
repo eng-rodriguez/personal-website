@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { isActive, primaryNav } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
-export function SiteNav() {
+export function SiteNav({ actions }: { actions?: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [renderedPath, setRenderedPath] = useState(pathname);
@@ -41,16 +41,19 @@ export function SiteNav() {
 
   return (
     <>
-      <button
-        type="button"
-        ref={toggleRef}
-        aria-expanded={open}
-        aria-controls="primary-navigation"
-        onClick={() => setOpen((value) => !value)}
-        className="inline-flex min-h-10 items-center rounded-md border border-input px-3 text-sm font-medium md:hidden"
-      >
-        Menu
-      </button>
+      <div className="ms-auto flex flex-wrap items-center justify-end gap-2">
+        {actions}
+        <button
+          type="button"
+          ref={toggleRef}
+          aria-expanded={open}
+          aria-controls="primary-navigation"
+          onClick={() => setOpen((value) => !value)}
+          className="inline-flex min-h-10 items-center rounded-md border border-input px-3 text-sm font-medium md:hidden"
+        >
+          Menu
+        </button>
+      </div>
       <nav
         id="primary-navigation"
         aria-label="Primary"

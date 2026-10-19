@@ -53,16 +53,40 @@ function atRules(name: string, params?: (value: string) => boolean): AtRule[] {
   return found;
 }
 
+const squash = (value: string) => value.replace(/\s+/g, "");
+
+function ruleInMedia(
+  mediaParams: string,
+  selector: string,
+): { media: AtRule | undefined; rule: Rule | undefined } {
+  const media = atRules("media", (p) => squash(p) === squash(mediaParams))
+    .map((m) => ({
+      media: m,
+      rule: m.nodes?.find(
+        (node): node is Rule =>
+          node.type === "rule" && squash(node.selector) === squash(selector),
+      ),
+    }))
+    .find((candidate) => candidate.rule);
+  return { media: media?.media, rule: media?.rule };
+}
+
+const empty = new Map<string, string>();
 const lightRoot = topLevelRules(":root")[0];
-const darkMedia = atRules(
-  "media",
-  (p) => p.replace(/\s+/g, "") === "(prefers-color-scheme:dark)",
-)[0];
-const darkRoot = darkMedia?.nodes?.find(
-  (node): node is Rule => node.type === "rule" && node.selector === ":root",
-);
-const light = lightRoot ? declarations(lightRoot) : new Map<string, string>();
-const dark = darkRoot ? declarations(darkRoot) : new Map<string, string>();
+const lightScheme = topLevelRules(':root[data-theme="light"]')[0];
+const osDarkRoot = ruleInMedia(
+  "screen and (prefers-color-scheme: dark)",
+  ':root:not([data-theme="light"])',
+).rule;
+const explicitDarkRoot = ruleInMedia("screen", ':root[data-theme="dark"]').rule;
+const printRoot = ruleInMedia("print", ":root").rule;
+const light = lightRoot ? declarations(lightRoot) : empty;
+const osDark = osDarkRoot ? declarations(osDarkRoot) : empty;
+const explicitDark = explicitDarkRoot ? declarations(explicitDarkRoot) : empty;
+
+function colorTokens(theme: Map<string, string>): Map<string, string> {
+  return new Map([...theme].filter(([prop]) => prop !== "color-scheme"));
+}
 
 // ---- Color math (CSS Color 4): OKLCH -> OKLab -> linear sRGB -> WCAG ratio.
 
@@ -150,8 +174,17 @@ describe("globals.css structure", () => {
         .map((n) => n.params)
         .join(),
     ).not.toContain("tw-animate-css");
-    expect(atRules("custom-variant")).toHaveLength(0);
     expect(css.replace(/\/\*[\s\S]*?\*\//g, "")).not.toMatch(/\.dark\b/);
+  });
+
+  it("test_ac3_defines_one_dark_variant_matching_both_states", () => {
+    const variants = atRules("custom-variant");
+    expect(variants).toHaveLength(1);
+    expect(variants[0].params).toBe("dark");
+    const body = squash(variants[0].toString());
+    expect(body).toContain("prefers-color-scheme:dark");
+    expect(body).toContain('[data-theme="dark"]');
+    expect(body).toContain(':not([data-theme="light"])');
   });
 
   it("excludes docs from Tailwind source detection", () => {
@@ -160,13 +193,58 @@ describe("globals.css structure", () => {
     );
   });
 
-  it("declares color-scheme light dark on :root", () => {
+  it("test_ac3_sets_color_scheme_per_state", () => {
     expect(light.get("color-scheme")).toBe("light dark");
+    expect(lightScheme && declarations(lightScheme).get("color-scheme")).toBe(
+      "light",
+    );
+    expect(explicitDark.get("color-scheme")).toBe("dark");
+    expect(osDark.has("color-scheme")).toBe(false);
   });
 
-  it("switches the dark theme only through prefers-color-scheme", () => {
-    expect(darkMedia).toBeDefined();
-    expect(darkRoot).toBeDefined();
+  it("test_ac3_ac14_declares_both_dark_blocks", () => {
+    expect(osDarkRoot).toBeDefined();
+    expect(explicitDarkRoot).toBeDefined();
+  });
+
+  it("test_ac8_keeps_the_two_dark_blocks_identical", () => {
+    expect(colorTokens(osDark)).toEqual(colorTokens(explicitDark));
+    expect([...colorTokens(osDark).keys()].sort()).toEqual(
+      [...COLOR_TOKENS].map((n) => `--${n}`).sort(),
+    );
+    expect([...colorTokens(explicitDark).keys()].sort()).toEqual(
+      [...COLOR_TOKENS].map((n) => `--${n}`).sort(),
+    );
+  });
+
+  it("test_ac14_prints_light_and_keeps_dark_tokens_on_screen_only", () => {
+    expect(printRoot).toBeDefined();
+    const print = declarations(printRoot!);
+    expect(print.get("color-scheme")).toBe("light");
+    expect([...print.keys()]).toEqual(["color-scheme"]);
+
+    root.walkRules((rule) => {
+      const sets = rule.nodes?.some(
+        (n) => n.type === "decl" && n.prop === "--background",
+      );
+      if (!sets || rule === lightRoot) return;
+      const parent = rule.parent;
+      expect(parent?.type, rule.selector).toBe("atrule");
+      expect(
+        (parent as AtRule).params.trim().startsWith("screen"),
+        rule.selector,
+      ).toBe(true);
+    });
+  });
+
+  it("test_ac11_hides_the_toggle_until_the_script_has_run", () => {
+    let found: Rule | undefined;
+    root.walkRules((r) => {
+      if (r.selector === "html:not([data-js]) [data-theme-toggle]") found = r;
+    });
+    expect(found && declarations(found).get("display")).toBe("none");
+    // Utilities (inline-flex) outrank @layer base, so the rule must be unlayered.
+    expect(found?.parent).toBe(root);
   });
 });
 
@@ -178,7 +256,8 @@ describe("design tokens", () => {
         .map((k) => k.slice(2))
         .sort();
     expect(names(light)).toEqual([...COLOR_TOKENS].sort());
-    expect(names(dark)).toEqual([...COLOR_TOKENS].sort());
+    expect(names(osDark)).toEqual([...COLOR_TOKENS].sort());
+    expect(names(explicitDark)).toEqual([...COLOR_TOKENS].sort());
   });
 
   it("maps each color token in @theme inline", () => {
@@ -220,7 +299,8 @@ describe("base rules", () => {
 
 const themes = [
   ["light", light],
-  ["dark", dark],
+  ["dark (OS)", osDark],
+  ["dark (explicit)", explicitDark],
 ] as const;
 
 describe.each(themes)("color tokens (%s)", (_name, theme) => {

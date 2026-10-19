@@ -1,6 +1,6 @@
 # Design system
 
-Tailwind CSS v4 and shadcn/ui, with semantic tokens that follow the OS color scheme. Decision record: [ADR 0002](adr/0002-tailwind-v4-tokens-os-only-theming.md). `src/app/globals.css` is the only source of token values; this page does not copy them.
+Tailwind CSS v4 and shadcn/ui, with semantic tokens that follow the OS color scheme or the visitor's theme choice. Decision records: [ADR 0002](adr/0002-tailwind-v4-tokens-os-only-theming.md) (tokens, focus, contrast) and [ADR 0004](adr/0004-theme-choice-with-pre-paint-script.md) (theme choice). `src/app/globals.css` is the only source of token values; this page does not copy them.
 
 ## Where tokens live
 
@@ -8,7 +8,7 @@ Tailwind CSS v4 and shadcn/ui, with semantic tokens that follow the OS color sch
 - Components use token utilities (`bg-background`, `text-muted-foreground`, `outline-ring`). They never hard-code colors.
 - To add a color token:
   1. Add its light value to `:root`.
-  2. Add its dark value to `:root` inside `@media (prefers-color-scheme: dark)`.
+  2. Add its dark value to both dark blocks (`:root:not([data-theme="light"])` under `@media screen and (prefers-color-scheme: dark)`, and `:root[data-theme="dark"]` under `@media screen`). The values must be identical; the test fails if they differ.
   3. Map it in `@theme inline` as `--color-<name>: var(--<name>)`.
   4. Add its contrast pairs and the name to `src/app/globals.test.ts`.
 - Values are `oklch(...)` inside the sRGB gamut. The test fails on any other format or an out-of-gamut color.
@@ -26,11 +26,30 @@ Tailwind CSS v4 and shadcn/ui, with semantic tokens that follow the OS color sch
 
 ## Themes
 
-Light and dark follow `prefers-color-scheme` only. There is no toggle, no `.dark` class and no `next-themes`. Tailwind's default `dark:` variant is media-based, but components avoid `dark:` overrides: per-theme differences belong in token values, where the contrast test checks them. `layout.tsx` exports `viewport.colorScheme` so the canvas and native controls match the OS before the stylesheet loads.
+The visitor chooses System (default), Light or Dark with the Theme toggle in the header (ADR 0004).
+
+- Storage: `localStorage` key `site-theme` holds `light` or `dark`. For System the key is removed. A missing, invalid or blocked value means System, and a storage error is swallowed and never logged. The in-session choice still applies when a write fails.
+- Attribute: the choice is `data-theme="light"` or `data-theme="dark"` on `<html>`. System is no attribute.
+- Pre-paint script: the root layout puts a constant inline script in `<head>`. It is owned by `src/lib/theme.ts` (`themeScript`), reads the key through an allowlist, sets `data-theme`, and always sets `data-js` on `<html>`. `<html>` has `suppressHydrationWarning`, and no other element does. A future Content Security Policy must allow this script by its hash.
+- Tokens, defined in `globals.css`:
+
+  | State | Tokens | `color-scheme` |
+  | --- | --- | --- |
+  | System or no JS, OS light | `:root` light | `light dark` |
+  | System or no JS, OS dark | OS dark block | `light dark` |
+  | Light, any OS | `:root` light | `light` |
+  | Dark, any OS | explicit dark block | `dark` |
+  | Print, any state | `:root` light | `light` |
+
+- System follows the OS live in CSS alone, with no listener. Light and Dark pin the theme, so OS changes do nothing. Other tabs follow a change through the `storage` event.
+- When printing, the page is always light (the `print` media type): dark tokens exist only under `@media screen`.
+- Without JavaScript `data-js` is absent, so the toggle is hidden (`display: none`) and the page follows the OS.
+- The `dark:` variant is redefined with `@custom-variant dark` to match the same two dark states. Components still avoid `dark:`: per-theme differences belong in token values, where the contrast test checks both dark blocks. There is no `.dark` class and no `next-themes`.
+- `layout.tsx` exports `viewport.colorScheme` so the canvas and native controls match the OS before the stylesheet loads.
 
 ## Contrast
 
-`src/app/globals.test.ts` parses `globals.css` and checks both themes with WCAG 2.2 ratios:
+`src/app/globals.test.ts` parses `globals.css` and checks the light theme and both dark blocks (OS and explicit) with WCAG 2.2 ratios:
 
 - At least 4.5:1 for text pairs, including the Button hover fills composited over `background`.
 - At least 3:1 for `ring` and `input` against `background`.
@@ -52,7 +71,19 @@ When a pair fails, change only the lightness of the token.
 - Active link rule: `isActive` in `src/lib/navigation.ts` (Home exact, sections exact or nested, pathname only). The active link has `aria-current="page"`, an underline and semibold weight, never color alone.
 - Skip link: the only allowed plain `focus:` utilities, used for visibility and position. The indicator stays the global outline.
 - Adding a core route: add it to `primaryNav`, add its page with a `metadata.title`, and update ADR 0003.
+- Theme toggle: a `radiogroup` named "Theme" of three native radios (System, Light, Dark) in `theme-toggle.tsx`. It reads the choice with `useSyncExternalStore` and is invisible (space reserved) until hydration, so a wrong selection is never shown. The selected option is a `primary` fill with semibold text and an underline in forced-colors mode. Focus is an outline on the label.
+- Header: `SiteNav` takes an `actions` prop, rendered with the Menu button in one right-aligned, wrapping cluster. Tab order: skip link, brand, Theme group, Menu (below `md`), links. Below about 400px row 1 is the brand and row 2 is the Theme group and Menu. At `md` and wider, row 1 is the brand and the Theme group and row 2 is the links.
 - Target size: interactive shell controls use `min-h-10`.
+
+## Breakpoints
+
+Tailwind v4 defaults, not redefined: `sm` 40rem, `md` 48rem, `lg` 64rem, `xl` 80rem, `2xl` 96rem. `md` (48rem) is the only shell breakpoint. The supported minimum width is 320px, and the container keeps `max-w-prose` on wide screens.
+
+Manual check for each core route (jsdom has no layout):
+
+- At 320px, at 1280px with 200% zoom, at 667 by 375 and at 1920px: no horizontal scrollbar, nothing clipped or overlapped, links and toggle options 40px tall.
+- At 320px open the menu and change the theme: both work, and the menu closes on Escape, link choice and widening past `md`.
+- With JavaScript disabled: the page follows the OS, no theme control or gap is shown, and links work at `md` and wider.
 
 ## Reduced motion
 
@@ -69,7 +100,7 @@ A global `prefers-reduced-motion: reduce` rule shortens animations and transitio
 1. Run `npx --yes shadcn@4.21.1 add <name>`, or a newer pinned version that is at least 2 weeks old. Never use `@latest`.
 2. Check `git status`. Revert CLI changes outside the brief's file list.
 3. Reinstall the pinned dependency versions and remove unused CLI additions (`tw-animate-css`, `lucide-react`, `shadcn`, and a `cn` package). `src/lib/utils.ts` keeps `cn` built from `clsx` and `tailwind-merge`, and components import it from `@/lib/utils`.
-4. Move any `.dark` variables into the media block and drop `dark:` overrides.
+4. Copy any `.dark` variables into both dark blocks (identical values) and drop `dark:` overrides.
 5. Replace ring focus classes with the outline classes used by `src/components/ui/button.tsx`, and add `motion-reduce:transition-none` to transitions.
 6. Add the component's color pairs to the contrast test and a component test.
 7. Run `npm run format` and `npm run check`, and list the generated files in the brief.

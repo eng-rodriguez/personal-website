@@ -1,14 +1,35 @@
 /*
- * Design tokens and global base rules (ADR 0002, docs/design-system.md).
- * The structure below is the contract that src/app/globals.test.ts parses:
- * 1. Tailwind import. 2. Light tokens on :root. 3. Dark tokens on :root inside
- * a prefers-color-scheme media query. 4. @theme inline color mapping.
- * 5. @theme spacing. 6. @layer base. Themes follow the OS only; there is no
- * .dark class.
+ * Design tokens and global base rules (ADR 0002, ADR 0004,
+ * docs/design-system.md). The structure below is the contract that
+ * src/app/globals.test.ts parses:
+ * 1. Tailwind import. 2. The dark: variant. 3. Light tokens on :root.
+ * 4. color-scheme for explicit Light. 5. Dark tokens for System (OS dark, not
+ * explicit Light). 6. The same dark tokens for explicit Dark. 7. Print always
+ * light. 8. @theme inline color mapping, @theme spacing and @layer base.
+ * Dark tokens exist only under @media screen. An explicit choice is the
+ * data-theme attribute on <html>; System is the absence of the attribute.
+ * There is no .dark class.
  */
 @import "tailwindcss";
 /* Class names quoted in planning docs must not reach the production CSS. */
 @source not "../../docs";
+
+/* Matches the same states as the dark token blocks below. */
+@custom-variant dark {
+  @media screen and (prefers-color-scheme: dark) {
+    &:where(
+      :root:not([data-theme="light"]),
+      :root:not([data-theme="light"]) *
+    ) {
+      @slot;
+    }
+  }
+  @media screen {
+    &:where([data-theme="dark"], [data-theme="dark"] *) {
+      @slot;
+    }
+  }
+}
 
 :root {
   color-scheme: light dark;
@@ -34,8 +55,12 @@
   --ring: oklch(0.6 0 0);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.205 0 0);
@@ -55,6 +80,37 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(0.5 0 0);
     --ring: oklch(0.556 0 0);
+  }
+}
+
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.185 22.216);
+    --destructive-foreground: oklch(0.145 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(0.5 0 0);
+    --ring: oklch(0.556 0 0);
+  }
+}
+
+@media print {
+  :root {
+    color-scheme: light;
   }
 }
 
@@ -111,4 +167,9 @@
       scroll-behavior: auto !important;
     }
   }
+}
+
+/* Unlayered on purpose: utilities (inline-flex) outrank @layer base. */
+html:not([data-js]) [data-theme-toggle] {
+  display: none;
 }

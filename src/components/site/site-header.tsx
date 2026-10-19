@@ -3,6 +3,7 @@ import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { containerClassName } from "./container";
 import { SiteNav } from "./site-nav";
+import { ThemeToggle } from "./theme-toggle";
 
 export function SiteHeader() {
   return (
@@ -19,7 +20,7 @@ export function SiteHeader() {
         >
           {site.name}
         </Link>
-        <SiteNav />
+        <SiteNav actions={<ThemeToggle />} />
       </div>
     </header>
   );

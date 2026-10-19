@@ -76,3 +76,46 @@ describe("SiteShell", () => {
     expect(brand).not.toHaveAttribute("aria-current");
   });
 });
+
+describe("SiteShell theme toggle", () => {
+  it.each(pages)(
+    "test_ac4_banner_contains_the_theme_group_for_%s",
+    (path, Page) => {
+      vi.mocked(usePathname).mockReturnValue(path);
+      render(
+        <SiteShell>
+          <Page />
+        </SiteShell>,
+      );
+
+      expect(
+        within(screen.getByRole("banner")).getByRole("radiogroup", {
+          name: "Theme",
+        }),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it("test_ac4_tab_order_is_skip_link_brand_theme_menu", () => {
+    const { container } = render(
+      <SiteShell>
+        <Home />
+      </SiteShell>,
+    );
+
+    const focusable = [
+      ...container.querySelectorAll(
+        'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      ),
+    ];
+    const brand = screen.getByRole("link", { name: site.name });
+    const firstRadio = screen.getAllByRole("radio")[0];
+    const menu = screen.getByRole("button", { name: "Menu" });
+    expect(focusable[0]).toBe(
+      screen.getByRole("link", { name: "Skip to main content" }),
+    );
+    const order = [brand, firstRadio, menu].map((el) => focusable.indexOf(el));
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+});
