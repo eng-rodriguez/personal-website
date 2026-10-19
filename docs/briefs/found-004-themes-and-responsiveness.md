@@ -290,12 +290,13 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
 - Resolved in this brief: `data-theme` attribute rather than a `.dark` class (D3); System means no attribute and is handled in CSS without `matchMedia` (D3, D8); duplicated dark blocks checked for equality (D3, tests); print light by limiting dark tokens to `screen` (D3); native radios in a `radiogroup` (D5); `useSyncExternalStore` with an unknown server snapshot (D5); `data-js` marker for no-JS (D7); `actions` slot in `SiteNav` for a deterministic header layout (D6); storage key `site-theme` (D1).
 
 ## 14. Checkpoint
-- Phase: brief approved; implementation (factory:react-builder)
+- Phase: implementation done (factory:react-builder); awaiting review and manual verification
 - Scope: FOUND-004 as in the approved story
 - Baseline: `origin/main` 1a516f1; branch `feat/found-004-themes-and-responsiveness`; story and brief committed first
 - Revisions: 0
 - Approvals: story assumptions A1 to A11 approved by owner on 2026-10-18; brief and ADR 0004 approved by owner on 2026-10-18, including the two-row header at `md` and wider and the toggle appearing on hydration
-- Check evidence: none yet
+- Check evidence (builder, 2026-10-18): `npm run check` exit 0 (typecheck, ESLint `--max-warnings=0`, Prettier, Vitest 14 files and 235 tests passed, production build). `git diff --stat origin/main -- package.json package-lock.json next.config.ts` is empty. Manual verification is not run by the builder.
+- Builder-verified: (1) D4 two-branch `@custom-variant dark` compiles in Tailwind 4.3.3: a temporary `dark:underline` produced both `@media (prefers-color-scheme:dark){...:where(:root:not([data-theme=light]),:root:not([data-theme=light]) *)}` and `@media screen{...:where([data-theme=dark],[data-theme=dark] *)}`; the class was then removed and the rebuilt CSS has none. (2) The built CSS contains `:has(:checked)` (6) and `:has(:focus-visible)` (3), `forced-colors:active` rules for `has-checked` underline, `@media print{:root{...color-scheme:light}}`, `:root[data-theme=light]{...color-scheme:light}` and `html:not([data-js]) [data-theme-toggle]{display:none}`. (3) D2 placement: `<head><script>` passes ESLint with zero warnings (no body fallback needed). `npm run dev` server output showed no warning for the five routes, and curl shows the script in `<head>` before `<body` on each; in the built HTML Next places its stylesheet `<link>` before the inline script (both in `<head>`), and `<html lang="en">` has no `data-theme`. Browser console hydration output is not covered (no browser); it stays in Manual step 5. (4) `renderToString` and `hydrateRoot` run under jsdom in Vitest 5 (hydration test passes with no console output). (5) The five routes build static (○); built HTML for each contains the script before `<body` and `data-theme-toggle`.
 - Repairs used: 0
 - Remaining blockers: none
-- Next action: factory:react-builder implements section 6 and records the builder-verified items
+- Next action: review, then owner runs Manual verification
