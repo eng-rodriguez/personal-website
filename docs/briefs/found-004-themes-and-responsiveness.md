@@ -290,7 +290,7 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
 - Resolved in this brief: `data-theme` attribute rather than a `.dark` class (D3); System means no attribute and is handled in CSS without `matchMedia` (D3, D8); duplicated dark blocks checked for equality (D3, tests); print light by limiting dark tokens to `screen` (D3); native radios in a `radiogroup` (D5); `useSyncExternalStore` with an unknown server snapshot (D5); `data-js` marker for no-JS (D7); `actions` slot in `SiteNav` for a deterministic header layout (D6); storage key `site-theme` (D1).
 
 ## 14. Checkpoint
-- Phase: review done; awaiting owner final review and Manual verification
+- Phase: PR #41 open; agent-run manual verification recorded; owner items remain
 - Scope: FOUND-004 as in the approved story
 - Baseline: `origin/main` 1a516f1; branch `feat/found-004-themes-and-responsiveness`; story and brief committed first
 - Revisions: 0
@@ -301,4 +301,16 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
 - Check evidence after repair 1: `npm run check` exit 0 (Vitest 14 files, 235 tests passed; five routes static); `npm audit --audit-level=high --omit=dev` exit 0 (test-verifier, before repair; no dependency change since)
 - Repairs used: 1 of 3
 - Remaining blockers: none
-- Next action: owner final review; owner runs Manual verification; open the PR
+- Manual verification, agent-run (2026-10-19, built-in browser of the Claude desktop app, `npm run build && npm run start` at HEAD 2489223, plus `npm run dev` for the console check). These results are agent evidence, not the owner's run:
+  - Step 4 passed: with no stored value, the page follows emulated light and dark, System is selected, and `color-scheme` is `light dark`.
+  - Step 5 partly passed: stored Light with OS dark, and stored Dark with OS light, give the stored theme on all five routes. The theme script is a synchronous inline `<script>` in `<head>` before `<body>` (the stylesheet `<link>` comes first). The console was clean on both servers (dev showed only React DevTools and HMR info). Not covered: a throttled filmstrip of the first painted frame, because the pane exposes no paint timing.
+  - Step 6 passed: System switches live when the emulated scheme changes; Light and Dark ignore OS changes.
+  - Step 7 partly passed: Tab order is skip link, brand, the Theme group (one stop, on the selected radio), then links (Menu below `md`). Arrow keys change the theme immediately. A 2px outline is visible in light and dark, and a mouse click shows none. The sr-only radio's own outline is not visible (design-review Minor 1 checked). Not covered: VoiceOver.
+  - Step 8 passed: the choice persists across reloads and routes, choosing System removes `site-theme`, and a second tab follows changes in both directions without a reload.
+  - Step 9 partly passed: `bogus` falls back to System, and storage writes that throw (simulated by overriding `Storage.prototype` after load) still apply the in-session choice, with no errors. Not covered: Chrome's "block site data" setting at page load (covered by unit tests only).
+  - Step 10 partly passed: at 320x640, 640x400 (1280px at 200% zoom), 667x375 and 1920x1080 on all five routes, there is no horizontal scroll, no clipped or overlapping header control, and the smallest target is 40px. At 320px the header has two rows (brand; Theme and Menu). With the menu open, the theme changes and the menu stays open; Escape closes it and returns focus to Menu. Content stays about 607px wide at 1920px. Not verified: closing on widening past `md`, because viewport emulation did not deliver `change` events reliably to listeners registered while narrow (a test listener also missed them). This code is unchanged from FOUND-003 and its unit test passes. Check it with a real window resize.
+  - Step 11 passed: in sandboxed iframes without `allow-scripts`, all five routes have no `data-js`, the toggle is `display: none` with zero width (no gap), five links show at 1024px, and the page follows emulated light and dark.
+  - Steps 12 and 13 not run: the pane cannot emulate forced colors, reduced motion or print media. They are covered by `globals.test.ts` structure tests only.
+  - Step 14 passed: every resource came from `http://localhost:3000`, and `document.cookie` was empty.
+  - Step 15 not run (owner reading). Step 16 passed: CI on PR #41 passed (6 passed, 1 skipped).
+- Next action: owner runs steps 12, 13 and 15, the throttled filmstrip in step 5, VoiceOver in step 7 and the real-window resize in step 10, then marks PR #41 ready
