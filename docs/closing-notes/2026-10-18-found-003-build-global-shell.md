@@ -1,6 +1,6 @@
 # Every page now shares one header, menu and footer
 
-**Status:** Ready for review
+**Status:** Shipped
 **Date:** 2026-10-18 · **Milestone:** none · **Risk:** Standard
 **Links:** Ticket [FOUND-003](https://github.com/eng-rodriguez/personal-website/issues/3) · [Story](../stories/found-003-build-global-shell.md) · [Brief](../briefs/found-003-build-global-shell.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/39)
 
@@ -26,5 +26,4 @@ The upcoming articles, projects and resume pages can be added inside one consist
 - No leadership input needed.
 
 ## What's next
-- Merge the pull request.
 - Next story: the content pipeline for articles and projects.
