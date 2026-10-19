@@ -225,12 +225,21 @@ Explicitly not changed: everything under `src/` except `src/scaffold.test.ts`, p
 - Follow-up, not this story: capture console and page errors (such as hydration warnings) in smoke tests; accessibility scanning; a Vercel preview target after the deployment decision; a `cooldown` for `github-actions` in Dependabot (from the PR 34 review).
 
 ## 14. Checkpoint
-- Phase: brief approved; building
+- Phase: step 1 (tooling, tests, docs) built; step 2 (pipeline) next
 - Scope: FOUND-005 as in the approved story (assumptions A1 to A7 and the Decisions section)
 - Baseline: `origin/main` ca694e1; feature branch `feat/found-005-engineering-quality-gates` to be cut from it. The current working tree is `docs/found-004-ship-notes` (a76d6c4), which predates ca694e1.
 - Preserved user edits: untracked `AGENTS.md` and `docs/reviews/dependabot-actions-pr-34.md` are not touched and not committed with this story.
 - Revisions: 0
 - Approvals: story assumptions and decisions approved by @eng-rodriguez; brief, ADR 0005, the D6 rule and local-only AC6 proof approved by @eng-rodriguez on 2026-10-19
-- Check evidence: none yet
+- Check evidence (react-builder, step 1, Node 24, branch feat/found-005-engineering-quality-gates):
+  - `@playwright/test` 1.63.0 is exact in `package.json` and locked in `package-lock.json` (`npx playwright --version` prints 1.63.0). Install printed the known audit and allow-scripts notices; no `--force` or `--legacy-peer-deps`.
+  - D4: `radio.check()` fails the hit-target check (the label intercepts pointer events), so `theme.spec.ts` clicks the label (`group.locator("label", { hasText: "Dark" })`) and then asserts the Dark radio is checked. No `force: true`.
+  - `test.use({ javaScriptEnabled: false })` inside `test.describe` passes `npm run lint` (no `react-hooks` complaint).
+  - D6: a temporary `test.skip(` in `e2e/theme.spec.ts` made `npm run lint` exit 1 ("Do not merge focused or skipped smoke tests", no-restricted-syntax); removed, lint exits 0.
+  - `npm run e2e`: exit 0, 11 passed (5 core routes, 1 theme, 5 no-JS), project chromium only, about 5 s with a warm `.next` build (the first run, with a cold build, took about 37 s); `lsof -nP -iTCP:3100 -sTCP:LISTEN` printed nothing afterwards.
+  - `npm run check`: exit 0, Vitest 14 files and 236 tests passed, build compiled.
+  - `npm audit --audit-level=high --omit=dev`: exit 0.
+  - `git status` shows no `playwright-report/` or `test-results/`.
+  - `upload-artifact` version, date and SHA: pipeline-builder (step 2). AC6 and AC12 manual runs: test-verifier.
 - Repairs used: 0
 - Next action: react-builder (section 1, step 1), then pipeline-builder (step 2)

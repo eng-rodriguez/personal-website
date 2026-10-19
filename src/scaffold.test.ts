@@ -8,6 +8,7 @@ const read = (file: string) => readFileSync(join(root, file), "utf8");
 const pkg = JSON.parse(read("package.json")) as {
   engines: { node: string };
   scripts: Record<string, string>;
+  devDependencies: Record<string, string>;
 };
 
 describe("scaffold configuration", () => {
@@ -34,5 +35,12 @@ describe("scaffold configuration", () => {
   it("test_ac9_node_24_is_pinned_in_nvmrc_and_engines", () => {
     expect(read(".nvmrc").trim()).toBe("24");
     expect(pkg.engines.node).toBe("24.x");
+  });
+
+  it("test_found005_e2e_script_runs_playwright_outside_check", () => {
+    expect(pkg.scripts.e2e).toBe("playwright test");
+    expect(pkg.scripts.check).not.toContain("e2e");
+    // Exact pin: the browser build is tied to the package version (ADR 0005).
+    expect(pkg.devDependencies["@playwright/test"]).toBe("1.63.0");
   });
 });
