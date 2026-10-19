@@ -240,6 +240,7 @@ Explicitly not changed: everything under `src/` except `src/scaffold.test.ts`, p
   - `npm run check`: exit 0, Vitest 14 files and 236 tests passed, build compiled.
   - `npm audit --audit-level=high --omit=dev`: exit 0.
   - `git status` shows no `playwright-report/` or `test-results/`.
-  - `upload-artifact` version, date and SHA: pipeline-builder (step 2). AC6 and AC12 manual runs: test-verifier.
+  - `upload-artifact` (pipeline-builder, step 2, 2026-10-19): `gh api repos/actions/upload-artifact/releases --paginate --jq '.[] | select(.draft==false and .prerelease==false) | [.tag_name,.published_at]|@tsv'` lists v7.0.2 (2026-10-07, after the 2026-10-05 cutoff, so excluded) and v7.0.1 (2026-04-10, newest eligible). `gh api repos/actions/upload-artifact/git/ref/tags/v7.0.1 --jq '.object|[.type,.sha]|@tsv'` returned `commit 043fb46d1a93c77aae656e7c1c64a875d1fc6a0a` (lightweight tag, no dereference needed). Pinned as `actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1`.
+  - AC6 and AC12 manual runs: test-verifier.
 - Repairs used: 0
 - Next action: react-builder (section 1, step 1), then pipeline-builder (step 2)
