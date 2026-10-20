@@ -312,14 +312,14 @@ Run on branch `feat/home-001-reusable-ui-primitives` at the implementation commi
 | 3 | `section.test.tsx` (test_ac3_*), `@ts-expect-error` under typecheck | none |
 | 4 | `card.test.tsx` (test_ac4_*) | none |
 | 5 | `tag.test.tsx` (test_ac5_*) | none |
-| 6 | `link.test.tsx` (test_ac6_*), `@ts-expect-error` lines under typecheck | none |
+| 6 | `link.test.tsx` (test_ac6_*, 32 tests, including the runtime href guard for backslash, control-character, whitespace and scheme cases and the untyped-spread override test), `@ts-expect-error` lines under typecheck | none |
 | 7 | `empty-state.test.tsx` (test_ac7_*) | none |
 | 8 | `grid.test.tsx` (test_ac8_*), built CSS grep (step 3) | 5 (layout at 320px, 640px, 1024px) |
 | 9 | `core-pages.test.tsx` (test_ac9_*), unchanged `page.test.tsx`, `npm run e2e` (11 passed), built HTML grep (step 3) | none |
 | 10 | `link.test.tsx` and `card.test.tsx` (test_ac10_*): no `outline-none` or `focus:` classes | 4 (visible outline, human only) |
 | 11 | `globals.test.ts` TEXT_PAIRS in three themes, `primitives-contrast.test.ts` (test_ac11_*) | 6 (forced colors, print) |
 | 12 | `primitives-docs.test.ts` (test_ac12_*), unchanged `shell-docs.test.ts` | 8 (owner read) |
-| 13 | `npm run check` exit 0 (25 files, 328 tests before the added file), `npm run e2e` exit 0 | none |
+| 13 | `npm run check` exit 0 (26 files, 350 tests after the Link repair), `npm run e2e` exit 0 | none |
 | 14 | CI `scope` job logic run locally (exit 0) | 9 (CI on the PR) |
 
 
