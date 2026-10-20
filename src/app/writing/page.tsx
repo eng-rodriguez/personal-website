@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
+import { EmptyState } from "@/components/primitives/empty-state";
+import { PageHeading } from "@/components/primitives/page-heading";
 
 export const metadata: Metadata = { title: "Writing" };
 
 export default function WritingPage() {
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight">Writing</h1>
-      <p className="mt-4 text-muted-foreground">Articles will appear here.</p>
+      <PageHeading
+        title="Writing"
+        description="Technical articles and notes."
+      />
+      <EmptyState
+        className="mt-8"
+        title="No articles yet"
+        description="Articles will appear here."
+      />
     </>
   );
 }

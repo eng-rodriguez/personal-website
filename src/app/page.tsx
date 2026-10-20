@@ -1,10 +1,6 @@
+import { PageHeading } from "@/components/primitives/page-heading";
 import { site } from "@/lib/site";
 
 export default function Home() {
-  return (
-    <>
-      <h1 className="text-3xl font-semibold tracking-tight">{site.name}</h1>
-      <p className="mt-4 text-muted-foreground">{site.description}</p>
-    </>
-  );
+  return <PageHeading title={site.name} description={site.description} />;
 }
