@@ -51,13 +51,60 @@ describe("Link", () => {
     },
   );
 
-  it("test_ac6_runtime_guard_throws_for_hrefs_cast_past_the_type", () => {
-    expect(() =>
-      render(<Link href={"//evil.example" as never}>x</Link>),
-    ).toThrow("Link href is not allowed");
-    expect(() =>
-      render(<Link href={"javascript:alert(1)" as never}>x</Link>),
-    ).toThrow("Link href is not allowed");
+  it.each([
+    "//evil.example",
+    "/\\evil.example",
+    "/\t/evil.example",
+    "/a\nb",
+    "/a\u0000b",
+    "/a b",
+    "javascript:alert(1)",
+    "JAVASCRIPT:alert(1)",
+    " javascript:alert(1)",
+    "data:text/html,x",
+    "vbscript:x",
+    "",
+  ])("test_ac6_runtime_guard_throws_for_%j", (href) => {
+    expect(() => render(<Link href={href as never}>x</Link>)).toThrow(
+      "Link href is not allowed",
+    );
+  });
+
+  it.each(["/a", "https://example.com/a", "mailto:a@b.c"] as const)(
+    "test_ac6_untyped_spread_cannot_override_fixed_attributes %s",
+    (href) => {
+      const smuggled = {
+        rel: "opener",
+        target: "_blank",
+        "data-slot": "x",
+        "data-variant": "y",
+      };
+      render(
+        <Link href={href} {...smuggled}>
+          Go
+        </Link>,
+      );
+      const a = screen.getByRole("link");
+      expect(a).not.toHaveAttribute("target");
+      expect(a).not.toHaveAttribute("data-variant");
+      expect(a).toHaveAttribute("data-slot", "link");
+      if (href.startsWith("https")) {
+        expect(a).toHaveAttribute("rel", "noopener noreferrer");
+      } else {
+        expect(a).not.toHaveAttribute("rel");
+      }
+    },
+  );
+
+  it("test_ac6_null_variant_is_unstyled", () => {
+    render(
+      <Link href="/" variant={null}>
+        Go
+      </Link>,
+    );
+    const a = screen.getByRole("link");
+    expect(a).toHaveClass("text-primary", "underline");
+    expect(a).not.toHaveAttribute("data-variant");
   });
 
   it("test_ac10_default_style_is_underlined_without_focus_overrides", () => {
@@ -122,6 +169,10 @@ describe("Link", () => {
       </Link>,
       // @ts-expect-error protocol-relative href is rejected
       <Link key="2" href="//example.com">
+        x
+      </Link>,
+      // @ts-expect-error backslash after the slash is rejected
+      <Link key="2b" href="/\\evil.example">
         x
       </Link>,
       // @ts-expect-error script scheme is rejected

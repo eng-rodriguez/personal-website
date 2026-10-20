@@ -130,11 +130,11 @@ Props: anchor props except `rel` and `target`, plus `href` and an optional `vari
 
 | Href | Renders |
 | --- | --- |
-| `/path` (not `//`) or `#id` | `next/link`, no `rel`, no `target` |
+| `/path` (not `//` or `/\`) or `#id` | `next/link`, no `rel`, no `target` |
 | `http://` or `https://` | plain `a` with `rel="noopener noreferrer"`, no `target` |
 | `mailto:` or `tel:` | plain `a`, no `rel` |
 
-Without `variant` the link is `text-primary` and underlined, so it is never marked by color alone. With `variant` it carries the `buttonVariants` classes, including the focus-visible outline. Type computed strings as one of the patterns, for example `` `/writing/${slug}` ``.
+Without `variant` the link is `text-primary` and underlined, so it is never marked by color alone. With `variant` it carries the `buttonVariants` classes, including the focus-visible outline. `size` applies only together with `variant` (`variant={null}` counts as no variant). Variant links do not wrap because button styles use `whitespace-nowrap`, so keep labels short. An href containing whitespace or control characters, or whose second character is `/` or `\`, throws at render. Type computed strings as one of the patterns, for example `` `/writing/${slug}` ``.
 
 ```tsx
 <Link href="https://example.com">Example</Link>
