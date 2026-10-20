@@ -411,7 +411,7 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
   - Two new contrast pairs (D10).
 
 ## 14. Checkpoint
-- Phase: implementation, verification and review complete; awaiting owner final review before the PR is opened
+- Phase: PR open (eng-rodriguez/personal-website#45); manual verification recorded below
 - Scope: HOME-001 as in the approved story (A1 to A13) and this brief; owner kept Grid at 1 to 3 columns at brief approval
 - Baseline: `feat/home-001-reusable-ui-primitives` cut from `origin/main` at 8868b79; story and brief committed at 2d979a1 (pre-implementation commit); untracked user files `AGENTS.md` and `docs/reviews/dependabot-actions-pr-34.md` preserved and not committed
 - Revisions: 3d05149 implementation, 9dcb307 acceptance tests, 5ea0649 Link repair, 5105ee9 evidence update
@@ -420,6 +420,15 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
 - Check evidence: at 5105ee9, `npm run check` exit 0 (26 files, 350 tests, static build); `npm run e2e` exit 0 (11 tests); local CI scope check exit 0; gitleaks on the review commits found no leaks; semgrep not installed
 - Reviews: no Critical findings. Security found two Important Link findings (untyped spread could override `rel`/`target`; `/\host` and control-character bypass of the protocol-relative check), fixed in 5ea0649 and confirmed by re-review. Remaining Minor findings are listed in the PR review summary
 - Repairs used: 1 of 3
-- Manual verification: steps 4 to 8 not yet run by the owner; step 9 needs the PR
+- Manual verification (2026-10-20, requested by @eng-rodriguez, run with an automated browser in Chromium against `npm run dev` with the step 4 fixture, then the fixture discarded; owner confirmation pending):
+  - Step 1: pass. Only `AGENTS.md` and `docs/reviews/dependabot-actions-pr-34.md` are untracked; every changed path is in section 11.
+  - Step 2: pass on a fresh clone of the branch at 5a93598 with Node.js 24.19.0: `npm ci`, `npm run check` exit 0 (26 files, 350 tests), `npm run e2e` exit 0 (11 tests).
+  - Step 3: pass. CSS has `grid-cols-2`, `grid-cols-3`, `min-width:0` and `overflow-wrap:break-word`; every route `h1=1`; `empty-state=1` on the four placeholders and `0` on index.
+  - Step 4: pass in light and dark. Tab order reaches the external Link, the variant Link and the Card title link, each with a solid outline (2px, 3px on the variant link); the shell controls keep theirs. Mouse-click focus was not checked; the class assertions in `link.test.tsx` and `card.test.tsx` cover it.
+  - Step 5: pass. Grid is 1 column at 320px and 639px, 2 at 640px and 1023px, 3 at 1024px and 1920px (186px columns inside `max-w-prose`); no horizontal page scroll and no card overflow with the 60-character word and long URL; partly empty last row. 200% zoom at 1280px is covered by the 640px width.
+  - Step 6: partial. Forced colors and print could not be emulated in the browser used. Card and Tag have 1px solid borders and EmptyState a dashed border, so a forced-colors boundary is drawn; the print block sets `color-scheme: light`. A DevTools emulation run by the owner is still open.
+  - Step 7: pass. The server HTML for `/` (with the fixture) and `/writing` contains the full `main` content and all primitive `data-slot`s, with no client-only primitive.
+  - Step 8: open; the owner reads the docs.
+  - Step 9: CI runs on the PR.
 - Remaining blockers: none
-- Next action: owner final review; on approval, commit closing notes, push and open the PR
+- Next action: owner confirms steps 6 and 8, then merges the PR; closing notes are then marked Shipped
