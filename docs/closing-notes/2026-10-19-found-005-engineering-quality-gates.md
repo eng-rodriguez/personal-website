@@ -1,6 +1,6 @@
 # Every change is now checked in a real browser before it can merge
 
-**Status:** Ready for review
+**Status:** Shipped
 **Date:** 2026-10-19 · **Milestone:** none · **Risk:** Standard
 **Links:** Ticket [FOUND-005](https://github.com/eng-rodriguez/personal-website/issues/5) · [Story](../stories/found-005-engineering-quality-gates.md) · [Brief](../briefs/found-005-engineering-quality-gates.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/43)
 
@@ -14,14 +14,14 @@ A change that breaks a main page or the theme choice is now caught before it rea
 - All 236 automated unit tests and all 11 browser tests passed. The full check and the security audit passed.
 - We broke one page's heading on purpose. The browser tests failed, named the page and the missing heading, and saved a report. The change was then undone.
 - Three independent reviews (requirements, design and security) found no critical or important issues. Three minor notes were fixed, the rest left open.
-- Not yet verified: the new browser check has not run on GitHub's servers, and the report upload after a real failure there was not tested, by choice.
+- The new browser check ran on GitHub's servers for this change and all 11 tests passed. The report upload after a real failure there was not tested, by choice.
 
 ## Not included / deferred
 - Other browsers, mobile devices, visual comparison, accessibility scanning, and testing against a live preview site.
 
 ## Risks and decisions
 - Decision recorded: browser tests run separately from the quick local check ([ADR 0005](../adr/0005-playwright-smoke-tests-outside-check.md)).
-- The owner should confirm that GitHub requires the combined "ci-ok" result before merging.
+- GitHub requires the combined "ci-ok" result before merging (confirmed on the main branch rules).
 - No leadership input needed.
 
 ## What's next
