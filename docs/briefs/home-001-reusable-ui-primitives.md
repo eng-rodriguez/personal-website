@@ -111,6 +111,11 @@ Decisions:
     - With `variant` (and optional `size`): `cn(buttonVariants({ variant, size }), className)` plus `data-variant={variant}`. This gives the Button's focus-visible outline classes, no `dark:` classes, and `motion-reduce:transition-none` on the Button's `transition-all`.
     - `className` is merged last in both cases.
   - Focus: no focus classes are added in the default style, so the global `:focus-visible` outline in `globals.css` applies. Nothing removes it (AC10).
+  - Repair round 1 (security review) tightened this design; the code and the `docs/design-system.md` Link entry are authoritative where they differ from the text above:
+    - `LinkHref` also excludes `` `/\\${string}` ``. At runtime, an href containing whitespace or a control character (U+0000 to U+0020, U+007F to U+009F) throws, and an internal href whose second character is `/` or `\` throws. This closes `/\host` and `/<tab>/host`, which browsers resolve to `//host`. Callers percent-encode spaces, including in `mailto:` query values.
+    - `rel` and `target` are also stripped from the props at runtime, and `data-slot`, `data-variant`, the merged `className` and the external `rel` are placed after the caller's spread, so an untyped spread cannot override them.
+    - `variant={null}` is treated like no variant. `size` applies only with a `variant`. Variant links do not wrap (`whitespace-nowrap` from `buttonVariants`), so their labels stay short.
+    - Error messages quote the href with `JSON.stringify`.
   - `typedRoutes` is not enabled. The installed docs (`node_modules/next/dist/docs/01-app/03-api-reference/05-config/02-typescript.md`, "Statically Typed Links") describe it as an opt-in `next.config.ts` flag. It types `next/link` against generated route lists and needs `as Route` casts for non-literal strings. It would change `next.config.ts`, it covers internal paths only, and it would not express the external, `mailto:` and `tel:` policy. With it off, `next/link` accepts `string | UrlObject`, so `LinkHref<H>` is passed through without a cast. If a later story enables `typedRoutes`, the internal branch will need `href as Route` and that story owns the change (section 13).
 - **D7. EmptyState (`empty-state.tsx`).**
   - Props: `title: string`, `description: string`, `action?: ReactNode`, `headingLevel?: "h2" | "h3" | "h4"` (default `"h2"`), `className?: string`.
@@ -406,12 +411,15 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
   - Two new contrast pairs (D10).
 
 ## 14. Checkpoint
-- Phase: brief written; awaiting owner approval
-- Scope: HOME-001 as in the approved story (A1 to A13; owner decisions at story approval: Section, Card, Grid and Tag docs and tests only; the Link scheme policy; EmptyState on the four placeholder routes with PageHeading keeping a short description; Grid 1 to 3 columns; Card title link optional)
-- Baseline: 722c0d1 on `docs/found-005-ship-notes`; `feat/home-001-reusable-ui-primitives` to be cut from `origin/main`; untracked user files `AGENTS.md` and `docs/reviews/dependabot-actions-pr-34.md` preserved
-- Revisions: 0
-- Approvals: story approved by @eng-rodriguez; brief not yet approved
-- Check evidence: none yet
-- Repairs used: 0 of 3
+- Phase: implementation, verification and review complete; awaiting owner final review before the PR is opened
+- Scope: HOME-001 as in the approved story (A1 to A13) and this brief; owner kept Grid at 1 to 3 columns at brief approval
+- Baseline: `feat/home-001-reusable-ui-primitives` cut from `origin/main` at 8868b79; story and brief committed at 2d979a1 (pre-implementation commit); untracked user files `AGENTS.md` and `docs/reviews/dependabot-actions-pr-34.md` preserved and not committed
+- Revisions: 3d05149 implementation, 9dcb307 acceptance tests, 5ea0649 Link repair, 5105ee9 evidence update
+- Approvals: story and brief approved by @eng-rodriguez; final review pending
+- Builder-verified items: `useId` in the Section Server Component builds and all five routes stay static; `wrap-break-word` and `*:min-w-0` compile in Tailwind 4.3.3; the plain `LinkHref<H>` form infers under TypeScript 6.0.3 (no `H & LinkHref<H>` fallback); `<Link<H> href={href}>` in Card compiles
+- Check evidence: at 5105ee9, `npm run check` exit 0 (26 files, 350 tests, static build); `npm run e2e` exit 0 (11 tests); local CI scope check exit 0; gitleaks on the review commits found no leaks; semgrep not installed
+- Reviews: no Critical findings. Security found two Important Link findings (untyped spread could override `rel`/`target`; `/\host` and control-character bypass of the protocol-relative check), fixed in 5ea0649 and confirmed by re-review. Remaining Minor findings are listed in the PR review summary
+- Repairs used: 1 of 3
+- Manual verification: steps 4 to 8 not yet run by the owner; step 9 needs the PR
 - Remaining blockers: none
-- Next action: owner reviews this brief; on approval, factory:react-builder implements in the section 1 order
+- Next action: owner final review; on approval, commit closing notes, push and open the PR
