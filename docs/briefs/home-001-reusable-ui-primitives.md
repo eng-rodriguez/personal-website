@@ -287,8 +287,13 @@ Prerequisites: Chrome or Edge with DevTools (device toolbar, and the Rendering p
 
 1. `git status` on the branch before committing. Expected: `AGENTS.md` and `docs/reviews/dependabot-actions-pr-34.md` are untracked and not staged, and every changed path is in section 11. Automated.
 2. `npm ci`, then `npm run check; echo $?`, then `npx playwright install chromium` (once) and `npm run e2e; echo $?`. Expected: both exit 0, with only the 3 known ESLint `ERESOLVE` notices. Record the Vitest file and test counts and the Playwright test count. Covers AC9 and AC13. Automated.
-3. Grep the built CSS for `grid-cols-2`, `grid-cols-3`, `min-width:0` and `overflow-wrap`. Grep the built HTML of `/writing`, `/projects`, `/experience` and `/resume` for `data-slot="empty-state"`, and of all five routes for exactly one `<h1`. Expected: all present, one `<h1` each. Covers AC8 and AC9. Automated.
-4. In light and then dark theme, Tab through `/writing` from the address bar. Expected: the skip link, shell controls and nav keep their outline as before. There is no new focus stop in `main`, because EmptyState has no action on these pages. To check the Link and Card title link, temporarily render `<Card title="Test" href="/projects" />` and `<Link href="https://example.com">x</Link>` on `/` under `npm run dev`. Tab to each, and confirm the 2px `ring` outline is visible and that clicking shows none. Then discard the temporary edit (`git checkout -- src/app/page.tsx`). Covers AC10. Human only.
+3. After `npm run build`, run:
+   ```sh
+   cat .next/static/chunks/*.css | grep -oE "grid-cols-[23]|min-width:0|overflow-wrap:break-word" | sort | uniq -c
+   for r in index writing projects experience resume; do echo "$r h1=$(grep -o '<h1' .next/server/app/$r.html | wc -l) empty-state=$(grep -c 'data-slot="empty-state"' .next/server/app/$r.html)"; done
+   ```
+   Expected: the CSS lines `grid-cols-2`, `grid-cols-3`, `min-width:0` and `overflow-wrap:break-word` appear. Each route prints `h1=1`. `empty-state=1` for writing, projects, experience and resume, and `empty-state=0` for index. Covers AC8 and AC9. Automated.
+4. In light and then dark theme, Tab through `/writing` from the address bar. Expected: the skip link, shell controls and nav keep their outline as before. There is no new focus stop in `main`, because EmptyState has no action on these pages. To check the Link and Card title link, temporarily add this to `src/app/page.tsx` (import `Card` from `@/components/primitives/card` and `Link` from `@/components/primitives/link`): render `<Card title="Test" href="/projects" />` and `<Link href="https://example.com">x</Link>` on `/` under `npm run dev`. Tab to each, and confirm the 2px `ring` outline is visible and that clicking shows none. Then discard the temporary edit (`git checkout -- src/app/page.tsx`). Covers AC10. Human only.
 5. On each of the five routes, at 320px width, at 1280px with 200% zoom and at 1920px. Expected: no horizontal scrollbar, the heading and EmptyState text wrap, and the EmptyState dashed border is visible. With the same temporary edit as step 4, render a `<Grid columns={3}>` of five Cards, one with a 60-character unbroken word and one with a long URL as its description. Expected: 1 column below 640px, 2 from 640px, 3 from 1024px, a partly empty last row, and no overflow. Then discard the edit. Covers AC8 and the wrapping, odd-row and narrow-width edge cases. Human only. Owner judgment: whether 3 columns at `lg` inside `max-w-prose` is too narrow (section 13).
 6. Emulate `forced-colors: active` on `/writing` (EmptyState border) and on the temporary Card and Tag. Expected: the borders and the Tag outline are visible. Emulate print. Expected: light colors. Covers AC11 and the forced-colors edge case. Human only.
 7. Disable JavaScript and reload `/` and `/writing`. Expected: the same content and layout as with JavaScript. Covers the hydration edge case. Human only.
@@ -296,6 +301,27 @@ Prerequisites: Chrome or Edge with DevTools (device toolbar, and the Rendering p
 9. Open the PR. Expected: `web`, `e2e`, `scope` and `ci-ok` succeed. Environment evidence, blocked until the PR exists.
 
 Rollback: revert the merge commit through a PR (`git revert -m 1 <merge-sha>`), then re-run step 2. Expected: the pages are back to inline `h1` and paragraph markup, and `src/components/primitives` is gone.
+
+#### Criterion evidence (test agent run)
+Run on branch `feat/home-001-reusable-ui-primitives` at the implementation commit plus the added `primitives-contrast.test.ts`. `npm run check` exit 0 and `npm run e2e` exit 0 (11 Playwright tests). Local CI scope check against `origin/main`: exit 0, every non-exempt path listed in this brief. `git diff --stat origin/main -- package.json package-lock.json next.config.ts tsconfig.json e2e` is empty. Built HTML: one `<h1` on all five routes, `data-slot="empty-state"` on the four placeholders only. Human steps below stay open until the owner records a run.
+
+| AC | Automated evidence | Manual step |
+| --- | --- | --- |
+| 1 | `primitives-source.test.ts` (test_ac1_*), `text.test.ts`, `npm run typecheck`, ESLint `--max-warnings=0` | none |
+| 2 | `page-heading.test.tsx` (test_ac2_*) | none |
+| 3 | `section.test.tsx` (test_ac3_*), `@ts-expect-error` under typecheck | none |
+| 4 | `card.test.tsx` (test_ac4_*) | none |
+| 5 | `tag.test.tsx` (test_ac5_*) | none |
+| 6 | `link.test.tsx` (test_ac6_*), `@ts-expect-error` lines under typecheck | none |
+| 7 | `empty-state.test.tsx` (test_ac7_*) | none |
+| 8 | `grid.test.tsx` (test_ac8_*), built CSS grep (step 3) | 5 (layout at 320px, 640px, 1024px) |
+| 9 | `core-pages.test.tsx` (test_ac9_*), unchanged `page.test.tsx`, `npm run e2e` (11 passed), built HTML grep (step 3) | none |
+| 10 | `link.test.tsx` and `card.test.tsx` (test_ac10_*): no `outline-none` or `focus:` classes | 4 (visible outline, human only) |
+| 11 | `globals.test.ts` TEXT_PAIRS in three themes, `primitives-contrast.test.ts` (test_ac11_*) | 6 (forced colors, print) |
+| 12 | `primitives-docs.test.ts` (test_ac12_*), unchanged `shell-docs.test.ts` | 8 (owner read) |
+| 13 | `npm run check` exit 0 (25 files, 328 tests before the added file), `npm run e2e` exit 0 | none |
+| 14 | CI `scope` job logic run locally (exit 0) | 9 (CI on the PR) |
+
 
 ## 10. Docs impact and observability
 - `docs/design-system.md`: a new `## UI primitives` section after "Global shell" and before "Breakpoints". It contains:
