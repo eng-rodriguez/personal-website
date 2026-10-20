@@ -322,6 +322,8 @@ const TEXT_PAIRS: [string, string][] = [
   ["accent-foreground", "accent"],
   ["destructive-foreground", "destructive"],
   ["primary", "background"],
+  ["muted-foreground", "card"],
+  ["primary", "card"],
 ];
 
 // Button hover fills: the fill token at the given opacity over the page.

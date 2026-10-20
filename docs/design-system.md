@@ -75,6 +75,103 @@ When a pair fails, change only the lightness of the token.
 - Header: `SiteNav` takes an `actions` prop, rendered with the Menu button in one right-aligned, wrapping cluster. Tab order: skip link, brand, Theme group, Menu (below `md`), links. Below about 400px row 1 is the brand and row 2 is the Theme group and Menu. At `md` and wider, row 1 is the brand and the Theme group and row 2 is the links.
 - Target size: interactive shell controls use `min-h-10`.
 
+## UI primitives
+
+Seven typed Server Components live in `src/components/primitives`, one file per component, imported through `@/components/primitives/<file>` (no barrel). `src/components/ui` stays shadcn-only and `src/components/site` stays the shell. Every primitive has a `data-slot`, takes an optional `className` merged last, uses token utilities and literal class names only, and has no `dark:` variant.
+
+Rules:
+
+- Heading levels: only PageHeading renders the page `h1`, one per route. Section, Card and EmptyState take `headingLevel` (`h2` to `h4`; `h1` is a type error). The level changes semantics only, not size. Skipping levels is the caller's responsibility.
+- Empty text: required text (titles, EmptyState description, Tag text) that is empty or whitespace fails the build. An empty optional description renders nothing.
+- Primitives have no outer margin. Pages add spacing through `className`.
+
+### PageHeading
+
+Use once per page. Props: `title`, `description?`, `className?`. Renders a `div` with the `h1` and an optional paragraph.
+
+```tsx
+<PageHeading title="Writing" description="Technical articles and notes." />
+```
+
+### Section
+
+Use to group content under a heading. Props: `title`, `headingLevel?` (default `h2`), `description?`, `children`, `className?`. Renders a `section` named by its heading through `aria-labelledby`.
+
+```tsx
+<Section title="Recent" headingLevel="h2">
+  <Grid columns={2}>{cards}</Grid>
+</Section>
+```
+
+### Card
+
+A static `article`, not clickable as a whole. Props: `title`, `href?`, `headingLevel?` (default `h3`), `description?`, `footer?`, `className?`. With `href` the title is the card's single link (title-link pattern); without it the card is static. The footer is for non-interactive metadata such as Tags and dates, never controls.
+
+```tsx
+<Card
+  title="Site"
+  href="/projects"
+  description="A personal website."
+  footer={<Tag>TypeScript</Tag>}
+/>
+```
+
+### Tag
+
+A static, non-focusable `span`. Props: `children` (text), `className?`. It keeps a transparent border so its boundary shows in forced-colors mode.
+
+```tsx
+<Tag>TypeScript</Tag>
+```
+
+### Link
+
+Props: anchor props except `rel` and `target`, plus `href` and an optional `variant` and `size` from `buttonVariants`. The `href` type accepts only the patterns below; anything else fails typecheck, and a value cast past the type throws at render.
+
+| Href | Renders |
+| --- | --- |
+| `/path` (not `//`) or `#id` | `next/link`, no `rel`, no `target` |
+| `http://` or `https://` | plain `a` with `rel="noopener noreferrer"`, no `target` |
+| `mailto:` or `tel:` | plain `a`, no `rel` |
+
+Without `variant` the link is `text-primary` and underlined, so it is never marked by color alone. With `variant` it carries the `buttonVariants` classes, including the focus-visible outline. Type computed strings as one of the patterns, for example `` `/writing/${slug}` ``.
+
+```tsx
+<Link href="https://example.com">Example</Link>
+<Link href="/projects" variant="outline">Projects</Link>
+```
+
+### EmptyState
+
+Use instead of an empty Grid or list. Props: `title`, `description`, `action?`, `headingLevel?` (default `h2`), `className?`. The action container renders only when an action is given. It is static content, not a live region.
+
+```tsx
+<EmptyState title="No articles yet" description="Articles will appear here." />
+```
+
+### Grid
+
+Props: `columns?` (1, 2 or 3, default 1), `children`, `className?`. One column below `sm` (40rem), two from `sm`, three from `lg` (64rem). Children are the direct grid items and may shrink (`min-w-0`). An odd last row stays partly empty. Zero children renders an empty grid, so show EmptyState instead.
+
+```tsx
+<Grid columns={3}>
+  <Card title="One" />
+  <Card title="Two" />
+</Grid>
+```
+
+### Button
+
+The shadcn `Button` in `src/components/ui/button.tsx` is reused unchanged for real buttons. For a link that looks like a button, use `Link` with `variant`, which applies `buttonVariants`.
+
+### Adding a primitive
+
+1. Add one file in `src/components/primitives`: a Server Component with an exported props type, a `data-slot`, literal classes and tokens only.
+2. Add its text and background pairs to `TEXT_PAIRS` in `src/app/globals.test.ts`.
+3. Add a test file next to it, and add it to `primitives-source.test.ts`.
+4. Add an entry in this section.
+5. List the path in the brief.
+
 ## Breakpoints
 
 Tailwind v4 defaults, not redefined: `sm` 40rem, `md` 48rem, `lg` 64rem, `xl` 80rem, `2xl` 96rem. `md` (48rem) is the only shell breakpoint. The supported minimum width is 320px, and the container keeps `max-w-prose` on wide screens.
@@ -94,6 +191,7 @@ A global `prefers-reduced-motion: reduce` rule shortens animations and transitio
 - Fonts: the system stack in `--font-sans`. No web fonts.
 - Type scale: Tailwind's defaults (`text-xs` to `text-9xl` with their paired line heights). It is not redefined.
 - Spacing: `--spacing` is `0.25rem`, so `p-4` is 1rem.
+- Page heading scale: lives in PageHeading (`src/components/primitives/page-heading.tsx`).
 
 ## Adding a shadcn component
 

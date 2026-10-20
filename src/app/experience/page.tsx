@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
+import { EmptyState } from "@/components/primitives/empty-state";
+import { PageHeading } from "@/components/primitives/page-heading";
 
 export const metadata: Metadata = { title: "Experience" };
 
 export default function ExperiencePage() {
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight">Experience</h1>
-      <p className="mt-4 text-muted-foreground">
-        Professional experience will appear here.
-      </p>
+      <PageHeading
+        title="Experience"
+        description="Roles I have held and what I did in them."
+      />
+      <EmptyState
+        className="mt-8"
+        title="No experience listed yet"
+        description="Professional experience will appear here."
+      />
     </>
   );
 }
