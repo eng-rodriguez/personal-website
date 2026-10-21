@@ -293,9 +293,9 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
   - No new contrast pair (D5).
 
 ## 14. Checkpoint
-- Phase: implementation done (uncommitted in the working tree, awaiting owner commit and PR)
+- Phase: verified and reviewed (committed on the branch, awaiting final review and PR)
 - Scope: HOME-002 as in the approved story (A1 to A12, decisions recorded at its top) and this brief
-- Baseline: branch `feat/home-002-homepage-hero` at 4678537 (base origin/main e66c548); untracked user files `AGENTS.md`, `docs/reviews/dependabot-actions-pr-34.md` and `docs/stories/home-004-mobile-navigation.md` preserved and not part of this change
+- Baseline: branch `feat/home-002-homepage-hero` at 4678537 (base origin/main e66c548); untracked user files `AGENTS.md` and `docs/reviews/dependabot-actions-pr-34.md` preserved and not part of this change
 - Revisions: none
 - Approvals: story approved by @eng-rodriguez on 2026-10-20; brief approved
 - Builder-verified items:
@@ -305,9 +305,10 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
   - AC5 Tab sequence at 1280 by 720 (skip link, header stops, then the two CTAs) passes in light and dark.
 - Check evidence: `npm run check` exit 0 (Vitest 30 files, 389 tests passed; build static); `npm run e2e` exit 0 (18 passed, Chromium)
 - Repairs used: 0 of 3 (one self-inflicted `@ts-expect-error` placement fix after Prettier, in a new test)
-- Manual verification: not started (owner)
-- Remaining blockers: owner manual verification; CI `web`, `e2e`, `scope`, `ci-ok` after the PR exists
-- Next action: owner reviews, commits and opens the PR
+- Reviews: implementation, design and security reviews found no Critical or Important findings; 7 Minor findings left open (see PR)
+- Manual verification: steps 1 to 10 run on 2026-10-20 by the agent at the owner's request, all pass. Visual steps used the desktop app's browser against `next start` (viewports 320, 640 for 1280 at 200% zoom, 667 by 375, 1920); forced colors, print, mouse focus and no-JavaScript used a scratch Playwright script, since the pane has no DevTools emulation; step 7 used `next dev` and was reverted. Not checked: real browser zoom (emulated by viewport width) and a screen reader.
+- Remaining blockers: CI `web`, `e2e`, `scope`, `ci-ok` after the PR exists
+- Next action: owner final review, then push and open the PR
 
 ## Manual verification
 Run by a human on a fresh clone of `feat/home-002-homepage-hero` with Node.js 24. This section consolidates the "Manual verification" steps in section 9 and adds the 667 by 375 landscape check. Automated results by the test agent: `npm run check` exit 0 (30 files, 389 tests), `npm run e2e` exit 0 (18 passed). That does not replace the human run.
