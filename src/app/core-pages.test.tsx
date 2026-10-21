@@ -10,7 +10,7 @@ import ResumePage from "@/app/resume/page";
 import { site } from "@/lib/site";
 
 const pages = [
-  ["app/page.tsx", Home, site.name, null],
+  ["app/page.tsx", Home, site.hero.name, null],
   [
     "app/writing/page.tsx",
     WritingPage,

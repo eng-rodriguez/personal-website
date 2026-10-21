@@ -8,8 +8,9 @@ describe("Home page", () => {
     render(<Home />);
 
     expect(
-      screen.getByRole("heading", { level: 1, name: site.name }),
+      screen.getByRole("heading", { level: 1, name: site.hero.name }),
     ).toBeInTheDocument();
+    expect(screen.getByText(site.hero.statement)).toBeInTheDocument();
     expect(screen.queryByRole("main")).toBeNull();
   });
 });
