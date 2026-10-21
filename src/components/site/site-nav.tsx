@@ -20,8 +20,6 @@ export function SiteNav({ actions }: { actions?: ReactNode }) {
   const navRef = useRef<HTMLElement>(null);
   // Removes the one-shot listeners that restore focus after an outside press.
   const pendingRestoreRef = useRef<(() => void) | null>(null);
-  // Removes the touch listeners that wait for a tap to finish.
-  const pendingTouchRef = useRef<(() => void) | null>(null);
 
   if (pathname !== renderedPath) {
     setRenderedPath(pathname);
@@ -54,10 +52,6 @@ export function SiteNav({ actions }: { actions?: ReactNode }) {
     if (!open) return;
     pendingRestoreRef.current?.();
     pendingRestoreRef.current = null;
-    return () => {
-      pendingTouchRef.current?.();
-      pendingTouchRef.current = null;
-    };
   }, [open]);
 
   useEffect(() => {
@@ -66,8 +60,6 @@ export function SiteNav({ actions }: { actions?: ReactNode }) {
       if (event.key === "Escape") {
         pendingRestoreRef.current?.();
         pendingRestoreRef.current = null;
-        pendingTouchRef.current?.();
-        pendingTouchRef.current = null;
         setOpen(false);
         toggleRef.current?.focus();
       }
@@ -120,36 +112,52 @@ export function SiteNav({ actions }: { actions?: ReactNode }) {
       pendingRestoreRef.current = remove;
     }
 
+    // An outside touch that may still become a tap. Touch closes on the tap's
+    // click, not on pointerup: the click is hit-tested against the open
+    // layout, so it lands on what is under the finger now and not on whatever
+    // would slide there once the menu collapses. A scroll ends in
+    // pointercancel and never produces a click, so it leaves the menu open.
+    let pendingTouch: { pointerId: number; focusWasInNav: boolean } | null =
+      null;
+
     function onPointerDown(event: PointerEvent) {
-      if (!(event.target instanceof Node) || isInside(event.target)) return;
+      if (!(event.target instanceof Node) || isInside(event.target)) {
+        pendingTouch = null;
+        return;
+      }
       if (event.pointerType !== "touch") {
+        pendingTouch = null;
         closeFromOutside();
         return;
       }
-      // Touch closes on tap only, so a scroll gesture leaves the menu open.
-      pendingTouchRef.current?.();
-      const id = event.pointerId;
-      const remove = () => {
-        document.removeEventListener("pointerup", onUp, true);
-        document.removeEventListener("pointercancel", onCancel, true);
-        pendingTouchRef.current = null;
+      pendingTouch = {
+        pointerId: event.pointerId,
+        focusWasInNav:
+          navRef.current?.contains(document.activeElement) ?? false,
       };
-      function onUp(upEvent: PointerEvent) {
-        if (upEvent.pointerId !== id) return;
-        remove();
-        closeFromOutside();
-      }
-      function onCancel(cancelEvent: PointerEvent) {
-        if (cancelEvent.pointerId === id) remove();
-      }
-      document.addEventListener("pointerup", onUp, true);
-      document.addEventListener("pointercancel", onCancel, true);
-      pendingTouchRef.current = remove;
+    }
+
+    function onPointerCancel(event: PointerEvent) {
+      if (pendingTouch?.pointerId === event.pointerId) pendingTouch = null;
+    }
+
+    function onClick(event: MouseEvent) {
+      const touch = pendingTouch;
+      pendingTouch = null;
+      if (!touch) return;
+      if (!(event.target instanceof Node) || isInside(event.target)) return;
+      setOpen(false);
+      // The tap's mousedown has already moved focus, so the press has settled.
+      if (touch.focusWasInNav) restoreFocusIfLost();
     }
 
     document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("pointercancel", onPointerCancel, true);
+    document.addEventListener("click", onClick, true);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("pointercancel", onPointerCancel, true);
+      document.removeEventListener("click", onClick, true);
     };
   }, [open]);
 

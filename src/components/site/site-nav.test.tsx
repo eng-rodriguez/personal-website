@@ -331,13 +331,16 @@ describe("SiteNav outside press", () => {
     expect(expanded()).toBe("false");
   });
 
-  it("test_ac4_touch_tap_outside_closes_on_pointerup", () => {
+  it("test_ac4_touch_tap_outside_closes_on_the_following_click", () => {
     renderHarness();
 
     openMenu();
-    fireEvent.pointerDown(footerText(), { pointerType: "touch", pointerId: 7 });
+    const touch = { pointerType: "touch", pointerId: 7 };
+    fireEvent.pointerDown(footerText(), touch);
     expect(expanded()).toBe("true");
-    fireEvent.pointerUp(footerText(), { pointerType: "touch", pointerId: 7 });
+    fireEvent.pointerUp(footerText(), touch);
+    expect(expanded()).toBe("true");
+    fireEvent.click(footerText());
     expect(expanded()).toBe("false");
   });
 
@@ -345,13 +348,46 @@ describe("SiteNav outside press", () => {
     renderHarness();
 
     openMenu();
-    fireEvent.pointerDown(footerText(), { pointerType: "touch", pointerId: 7 });
-    fireEvent.pointerCancel(footerText(), {
-      pointerType: "touch",
-      pointerId: 7,
-    });
-    fireEvent.pointerUp(footerText(), { pointerType: "touch", pointerId: 7 });
+    const touch = { pointerType: "touch", pointerId: 7 };
+    fireEvent.pointerDown(footerText(), touch);
+    fireEvent.pointerCancel(footerText(), touch);
+    fireEvent.pointerUp(footerText(), touch);
     expect(expanded()).toBe("true");
+    fireEvent.click(footerText());
+    expect(expanded()).toBe("true");
+  });
+
+  it("test_ac4_click_without_an_outside_touch_keeps_it_open", () => {
+    renderHarness();
+
+    openMenu();
+    fireEvent.click(footerText());
+    expect(expanded()).toBe("true");
+  });
+
+  it("test_ac4_touch_tap_with_focus_in_nav_returns_focus_to_toggle", () => {
+    renderHarness();
+
+    openMenu();
+    navLink("Writing").focus();
+    fireEvent.pointerDown(footerText(), { pointerType: "touch" });
+    // The tap's mousedown on a non-focusable element drops focus to body.
+    navLink("Writing").blur();
+    fireEvent.click(footerText());
+    expect(expanded()).toBe("false");
+    expect(document.activeElement).toBe(toggle());
+  });
+
+  it("test_ac4_touch_tap_in_main_keeps_focus_on_main", () => {
+    renderHarness();
+
+    openMenu();
+    navLink("Writing").focus();
+    fireEvent.pointerDown(mainEl(), { pointerType: "touch" });
+    mainEl().focus();
+    fireEvent.click(mainEl());
+    expect(expanded()).toBe("false");
+    expect(document.activeElement).toBe(mainEl());
   });
 
   it("test_ac4_mouse_pointerdown_closes", () => {

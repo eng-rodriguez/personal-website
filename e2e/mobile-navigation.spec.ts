@@ -105,12 +105,56 @@ test("/ outside tap closes the menu and restores focus from the nav", async ({
   await page.keyboard.press("Enter");
   await page.keyboard.press("Tab");
   await expect(nav(page).getByRole("link", { name: "Home" })).toBeFocused();
-  await page.locator("footer").tap({ position: { x: 2, y: 2 } });
+  // The footer is not focusable, so the tap leaves focus nowhere. Scroll it
+  // into view so the tap point is inside the viewport, and tap its middle:
+  // Chromium's touch adjustment snaps a tap near the edge onto focusable main.
+  const footer = page.locator("footer");
+  await footer.scrollIntoViewIfNeeded();
+  const footerBox = await footer.boundingBox();
+  if (!footerBox) throw new Error("/ footer has no box");
+  await page.touchscreen.tap(
+    footerBox.x + 2,
+    footerBox.y + footerBox.height / 2,
+  );
   await expect(menu(page), "/ closed by tap in footer").toHaveAttribute(
     "aria-expanded",
     "false",
   );
   await expect(menu(page), "/ focus after footer tap").toBeFocused();
+});
+
+test("/ outside tap where a CTA lands after collapse does not follow the link", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const cta = page
+    .getByRole("main")
+    .getByRole("link", { name: "View projects" });
+  const box = await cta.boundingBox();
+  if (!box) throw new Error("/ CTA has no box");
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+
+  await menu(page).tap();
+  await expect(menu(page), "/ expanded").toHaveAttribute(
+    "aria-expanded",
+    "true",
+  );
+  const linkUnderPoint = await page.evaluate(
+    ([px, py]) => !!document.elementFromPoint(px, py)?.closest("a"),
+    [x, y],
+  );
+  expect(linkUnderPoint, "/ point is not a link while open").toBe(false);
+
+  await page.touchscreen.tap(x, y);
+  await expect(menu(page), "/ closed by the tap").toHaveAttribute(
+    "aria-expanded",
+    "false",
+  );
+  // A ghost click would start a client navigation right after the tap.
+  await page.waitForTimeout(500);
+  await expect(page, "/ no navigation").toHaveURL(/\/$/);
 });
 
 test("/ tapping the Menu button while open closes once", async ({ page }) => {
