@@ -360,14 +360,22 @@ Explicitly not changed: `next.config.ts`, `tsconfig.json`, `vitest.config.mts`, 
 - Resolved in this brief: exact versions (D1), the shared field schemas (D3), the Frontmatter rules (D4), the loader and cache (D5), the API surface and error format (D6), the rejection of all JSX outside the allowlist including HTML tags (D7), the synchronous `/writing` (D8) and the real-content test (D9).
 
 ## 14. Checkpoint
-- Phase: brief approved, implementation starting
+- Phase: implemented, awaiting review and manual verification
 - Scope: BLOG-001 as in the approved story (A1 to A8) and this brief
 - Baseline: `feat/blog-001-article-schema-mdx-pipeline` to be cut from `origin/main` at e66c548
 - Revisions: none
 - Approvals: story and brief approved by @eng-rodriguez (section 13 defaults confirmed)
-- Builder-verified items: pending
-- Check evidence: none yet (pre-implementation: scratch `npm audit --omit=dev` with the three dependencies and React 19.3.1 reported 0 vulnerabilities)
+- Builder-verified items:
+  - The rejection plugin sees `mdxjsEsm` and expression nodes before `blockJS` strips them (user remark plugins run first); `compile.test.ts` rejects each construct and `globalThis.__mdxRan` stays undefined. next-mdx-remote rewraps thrown errors, so the plugin records its `ContentError` in a holder and `compileContent` rethrows it.
+  - `z.iso.date()` in Zod 4.6.5 rejects `2026-02-30`, `2025-02-29` and `2026-13-01` and accepts `2024-02-29`, so no `Date.UTC` refine was added.
+  - `yaml` core schema keeps `2026-03-10` a string (`frontmatter.test.ts`).
+  - Importing `src/lib/articles.ts` (static import of `next-mdx-remote/rsc`) works in the jsdom page tests and in `next build`; no dynamic import needed.
+  - `/writing` builds as ○ static, `next build` printed no new warning, `writing.html` has one `<h1` and one `data-slot="empty-state"`, and `grep -rl "mdx-js\|next-mdx-remote" .next/static` prints nothing.
+  - `npm ls zod`: direct `zod@4.6.5`; the transitive copies under `eslint-plugin-react-hooks` and `zod-validation-error` are deduped to 4.6.5.
+  - Component allowlist type: `ContentComponents = Readonly<Record<string, ComponentType<Record<string, unknown>>>>` was accepted by `compileMDX` without a cast.
+  - Deviation: `updatedAt >= publishedAt` uses `.refine(..., { when: () => true })` instead of `superRefine`, because Zod 4 skips object refinements when another field is invalid. The loader also reports a slug/filename mismatch when other fields are invalid.
+- Check evidence: `npm run check` exit 0 (34 test files, 441 tests, build lists `/writing` as ○); `npm run e2e` exit 0 (11 passed); `npm audit --audit-level=high --omit=dev` exit 0 (0 vulnerabilities); `git diff --stat -- e2e` empty. The full `npm audit` reports 5 high dev-only vulnerabilities (`braces` via eslint-config-next), not caused by this change.
 - Repairs used: 0 of 3
-- Manual verification: pending
+- Manual verification: steps 4 to 6 run by the builder agent (bad file: build fails naming `content/articles/bad-article.mdx`, `title` and `publishedAt`, the slug mismatch is covered by `articles.test.ts` after a loader fix made late; duplicate: both files named; unsafe body, draft or not: `articles-content.test.ts` fails naming file and construct; draft-only: build passes with EmptyState). Human run pending.
 - Remaining blockers: none
-- Next action: factory:react-builder implements section 11
+- Next action: review, then the owner's manual run (steps 1 to 3, 7, 8)
