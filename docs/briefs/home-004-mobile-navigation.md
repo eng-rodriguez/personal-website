@@ -241,6 +241,10 @@ The owner runs this on the branch with Node.js 24 before marking the PR ready, a
 7. Screen reader smoke (VoiceOver with Safari or Chrome on macOS, or NVDA on Windows) at 375px: the Menu button is announced as "Menu, button, collapsed" and then "expanded". Tab moves to "Home" in the "Primary" navigation. Escape returns to "Menu, collapsed". Choosing "Writing" announces the new page, and the reading cursor is in the main content, not at the top of the document. Human only.
 8. Read the "Global shell" and "Breakpoints" sections of `docs/design-system.md`, `docs/testing.md` and the CLAUDE.md Current state. Expected: the content in section 10. Human only.
 9. Open the PR. Expected: `web`, `e2e`, `scope` and `ci-ok` succeed. Environment evidence.
+10. Back and forward: at 375px open the menu on `/`, choose "Writing", open the menu again, then press the browser Back button. Expected: the menu closes and focus is in the main content, not on the document body (edge case "browser back or forward"; AC6). Human only.
+11. Mouse and keyboard dismissal at 375px (narrow desktop window): open the menu, click in `main` (mouse closes on press, unlike touch which closes on tap, O1), then reopen and press Escape with focus on the theme toggle. Expected: the menu closes each time; after Escape, focus is on the Menu button (AC3, AC4). Human only.
+
+Before step 1, make sure no other dev or e2e server is listening on port 3100 (`lsof -iTCP:3100 -sTCP:LISTEN`), because `playwright.config.ts` reuses an existing server locally and would test the wrong build.
 
 Rollback check: see section 12.
 
