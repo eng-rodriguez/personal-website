@@ -1,7 +1,7 @@
 # The home page now opens with a short introduction and two clear next steps
 
-**Status:** Ready for review
-**Date:** 2026-10-20 · **Milestone:** none · **Risk:** Standard
+**Status:** Shipped
+**Date:** 2026-10-21 · **Milestone:** none · **Risk:** Standard
 **Links:** Ticket [HOME-002](https://github.com/eng-rodriguez/personal-website/issues/7) · [Story](../stories/home-002-homepage-hero.md) · [Brief](../briefs/home-002-homepage-hero.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/47)
 
 ## What we delivered
