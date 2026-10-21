@@ -2,7 +2,7 @@
 
 **Status:** Ready for review
 **Date:** 2026-10-20 · **Milestone:** none · **Risk:** Standard
-**Links:** Ticket [HOME-002](https://github.com/eng-rodriguez/personal-website/issues/7) · [Story](../stories/home-002-homepage-hero.md) · [Brief](../briefs/home-002-homepage-hero.md) · [PR](<pending>)
+**Links:** Ticket [HOME-002](https://github.com/eng-rodriguez/personal-website/issues/7) · [Story](../stories/home-002-homepage-hero.md) · [Brief](../briefs/home-002-homepage-hero.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/47)
 
 ## What we delivered
 The home page now starts with an introduction: the owner's name, role, a one-paragraph positioning statement and two buttons, "View projects" and "Read writing". All of this text is kept in one settings file, so the owner can change it without touching the page design. The site refuses to build if the text is empty or a button points somewhere other than an existing section.
