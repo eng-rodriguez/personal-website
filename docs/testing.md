@@ -47,3 +47,9 @@ Download the `playwright-report-<attempt>` artifact from the run summary and unz
 ## Upgrading Playwright
 
 Keep an exact pin in `package.json` and follow the 2-week rule for new releases. After the upgrade run `npx playwright install chromium` again.
+
+## Content tests
+
+- Content tests run in the node environment (`// @vitest-environment node`).
+- Fixtures live in `src/lib/__fixtures__/articles/<case>/`. Pass `directory` and `mode` to the loader functions instead of changing real content.
+- `src/lib/articles-content.test.ts` validates and compiles the real `content/articles`, drafts included, so invalid content fails `npm run check`.
