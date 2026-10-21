@@ -452,16 +452,62 @@ describe("SiteNav link choice and history", () => {
     expect(document.activeElement).toBe(navLink("Writing"));
   });
 
-  it("test_ac6_popstate_with_focus_in_nav_focuses_main", () => {
-    renderHarness();
+  describe("path change with focus in the nav", () => {
+    const setVisible = (visible: boolean) =>
+      Object.defineProperty(HTMLElement.prototype, "checkVisibility", {
+        configurable: true,
+        value: () => visible,
+      });
+    afterEach(() => {
+      Reflect.deleteProperty(HTMLElement.prototype, "checkVisibility");
+    });
+    const changePath = (view: ReturnType<typeof renderHarness>) => {
+      mockPath("/writing");
+      view.rerender(
+        <>
+          <header>
+            <SiteNav actions={<button type="button">Action</button>} />
+          </header>
+          <main id="main-content" tabIndex={-1}>
+            <a href="#x">In main</a>
+            <p>Text</p>
+          </main>
+          <footer>
+            <p>Footer text</p>
+          </footer>
+        </>,
+      );
+    };
 
-    openMenu();
-    navLink("Writing").focus();
-    fireEvent(window, new PopStateEvent("popstate"));
-    expect(document.activeElement).toBe(mainEl());
-    mainLink().focus();
-    fireEvent(window, new PopStateEvent("popstate"));
-    expect(document.activeElement).toBe(mainLink());
+    it("test_ac6_path_change_with_focus_in_hidden_nav_focuses_main", () => {
+      const view = renderHarness();
+
+      openMenu();
+      navLink("Writing").focus();
+      setVisible(false);
+      changePath(view);
+      expect(expanded()).toBe("false");
+      expect(document.activeElement).toBe(mainEl());
+    });
+
+    it("test_ac6_path_change_with_visible_nav_keeps_focus", () => {
+      const view = renderHarness();
+
+      navLink("Writing").focus();
+      setVisible(true);
+      changePath(view);
+      expect(document.activeElement).toBe(navLink("Writing"));
+    });
+
+    it("test_ac6_path_change_with_focus_outside_nav_keeps_focus", () => {
+      const view = renderHarness();
+
+      openMenu();
+      mainLink().focus();
+      setVisible(false);
+      changePath(view);
+      expect(document.activeElement).toBe(mainLink());
+    });
   });
 });
 

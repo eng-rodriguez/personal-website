@@ -28,11 +28,16 @@ export function SiteNav({ actions }: { actions?: ReactNode }) {
     setOpen(false);
   }
 
-  // Next.js renders on popstate before a popstate listener can be relied on,
-  // and hiding the nav would drop focus to body. When the path changes while
-  // focus is still inside the nav, move it to main.
+  // When the path changes while focus is inside the nav and the collapsed
+  // mobile menu has just hidden it (Back or Forward), focus would drop to
+  // body, so move it to main. At md and wider the nav stays visible and focus
+  // follows normal Next.js behavior.
   useLayoutEffect(() => {
-    if (navRef.current?.contains(document.activeElement)) {
+    const navEl = navRef.current;
+    if (
+      navEl?.contains(document.activeElement) &&
+      navEl.checkVisibility?.() === false
+    ) {
       document.getElementById(mainContentId)?.focus({ preventScroll: true });
     }
   }, [renderedPath]);
@@ -142,19 +147,9 @@ export function SiteNav({ actions }: { actions?: ReactNode }) {
       pendingTouchRef.current = remove;
     }
 
-    // Registered in the capture phase: Next.js re-renders on popstate, which
-    // closes the menu and removes this listener before a bubble listener runs.
-    function onPopState() {
-      if (navRef.current?.contains(document.activeElement)) {
-        document.getElementById(mainContentId)?.focus({ preventScroll: true });
-      }
-    }
-
     document.addEventListener("pointerdown", onPointerDown, true);
-    window.addEventListener("popstate", onPopState, true);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown, true);
-      window.removeEventListener("popstate", onPopState, true);
     };
   }, [open]);
 

@@ -291,3 +291,24 @@ test("/ Back after a client navigation with focus on a menu link moves focus to 
   );
   expect(await focusInMain(page), "/ focus in main after Back").toBe(true);
 });
+
+test.describe("at 1024px", () => {
+  test.use({ viewport: { width: 1024, height: 768 }, hasTouch: false });
+
+  test("/ Enter on an inline nav link navigates and keeps focus on the link", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const link = nav(page).getByRole("link", { name: "Writing" });
+    await link.focus();
+    await page.keyboard.press("Enter");
+    await expect(page, "/writing after Enter").toHaveURL(/\/writing$/);
+    await expect(link, "/writing link current").toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    await expect(link, "/writing link focused").toBeFocused();
+    expect(await focusInMain(page), "/writing focus not in main").toBe(false);
+  });
+});
