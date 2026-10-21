@@ -293,14 +293,18 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
   - No new contrast pair (D5).
 
 ## 14. Checkpoint
-- Phase: brief written, awaiting approval
+- Phase: implementation done (uncommitted in the working tree, awaiting owner commit and PR)
 - Scope: HOME-002 as in the approved story (A1 to A12, decisions recorded at its top) and this brief
-- Baseline: to be recorded when `feat/home-002-homepage-hero` is cut from `origin/main`; untracked user files `AGENTS.md` and `docs/reviews/dependabot-actions-pr-34.md` preserved and not committed
+- Baseline: branch `feat/home-002-homepage-hero` at 4678537 (base origin/main e66c548); untracked user files `AGENTS.md`, `docs/reviews/dependabot-actions-pr-34.md` and `docs/stories/home-004-mobile-navigation.md` preserved and not part of this change
 - Revisions: none
-- Approvals: story approved by @eng-rodriguez on 2026-10-20; brief pending
-- Builder-verified items: pending (section 9)
-- Check evidence: none yet
-- Repairs used: 0 of 3
-- Manual verification: not started
-- Remaining blockers: brief approval
-- Next action: owner reviews this brief; on approval, factory:react-builder implements in the section 1 order
+- Approvals: story approved by @eng-rodriguez on 2026-10-20; brief approved
+- Builder-verified items:
+  - `/` builds as static (○); built HTML has one `<h1` and one `data-slot="hero"`.
+  - `as const satisfies` keeps the CTA hrefs narrow: no casts in `site.ts` or `hero.tsx`.
+  - The `@next/next/no-img-element` disable comment is accepted by `npm run lint` (`--max-warnings=0`).
+  - AC5 Tab sequence at 1280 by 720 (skip link, header stops, then the two CTAs) passes in light and dark.
+- Check evidence: `npm run check` exit 0 (Vitest 30 files, 389 tests passed; build static); `npm run e2e` exit 0 (18 passed, Chromium)
+- Repairs used: 0 of 3 (one self-inflicted `@ts-expect-error` placement fix after Prettier, in a new test)
+- Manual verification: not started (owner)
+- Remaining blockers: owner manual verification; CI `web`, `e2e`, `scope`, `ci-ok` after the PR exists
+- Next action: owner reviews, commits and opens the PR
