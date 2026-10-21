@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { primaryNav } from "../src/lib/navigation";
+import { site } from "../src/lib/site";
 import { scriptReadyAttribute } from "../src/lib/theme";
 
 test.describe("without JavaScript", () => {
@@ -34,4 +35,38 @@ test.describe("without JavaScript", () => {
       ).toHaveCount(0);
     });
   }
+
+  test("/ without JavaScript shows the hero and the primary CTA navigates", async ({
+    page,
+  }) => {
+    const { hero } = site;
+    await page.goto("/");
+    const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { level: 1 }), "/ h1").toHaveText(
+      hero.name,
+    );
+    await expect(
+      main.getByText(hero.role, { exact: true }),
+      "/ role",
+    ).toBeVisible();
+    await expect(
+      main.getByText(hero.statement, { exact: true }),
+      "/ statement",
+    ).toBeVisible();
+    for (const cta of hero.ctas) {
+      await expect(
+        main.getByRole("link", { name: cta.label, exact: true }),
+        `/ CTA ${cta.label}`,
+      ).toBeVisible();
+    }
+
+    await main
+      .getByRole("link", { name: hero.ctas[0].label, exact: true })
+      .click();
+    await expect(page, "/projects url").toHaveURL(hero.ctas[0].href);
+    await expect(
+      page.getByRole("heading", { level: 1 }),
+      "/projects h1",
+    ).toHaveText("Projects");
+  });
 });

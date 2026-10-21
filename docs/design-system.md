@@ -172,6 +172,27 @@ The shadcn `Button` in `src/components/ui/button.tsx` is reused unchanged for re
 4. Add an entry in this section.
 5. List the path in the brief.
 
+## Hero
+
+The home page (`/`) renders the `Hero` Server Component from `src/components/site/hero.tsx`. The copy lives in `site.hero` in `src/lib/site.ts`; the types and rules are in `src/lib/hero.ts`. To change the copy, edit the config only, never `hero.tsx`.
+
+```ts
+// src/lib/hero.ts
+export type HeroConfig = {
+  readonly name: string;
+  readonly role: string;
+  readonly statement: string;
+  readonly ctas: readonly [HeroCta, HeroCta]; // { label, href }
+  readonly portrait?: HeroPortrait; // { src, alt, width, height }
+};
+```
+
+- Validation: `heroProblems` checks every rule (non-empty text, exactly two CTAs, hrefs from `primaryNav` that are not `/` and not repeated, a valid portrait). Invalid copy fails `npm test` and `npm run build`.
+- Heading: the name is the only `h1`, through PageHeading, and the role is its description. The document title stays `site.name`; `site.description` stays the metadata description and is not rendered on `/`.
+- CTAs: exactly two, internal core routes from `primaryNav` only (not `/`, not repeated), no `mailto:`, `tel:` or external links. The first uses the primary style and the second the `outline` variant. Keep labels to about 20 characters at most, because variant links do not wrap (the 320px e2e test fails on overflow).
+- Portrait: optional and off by default. To add one, put the file in `public/`, set `src` to its local path, a non-empty `alt`, and the image's real `width` and `height`. Local paths only. It is a plain `img` until a story moves it to `next/image`.
+- Keyboard and mobile checks: Tab reaches the two CTAs after the header, each with a visible outline in Light and Dark; there is no horizontal scroll at 320px and at 1280px with 200% zoom.
+
 ## Breakpoints
 
 Tailwind v4 defaults, not redefined: `sm` 40rem, `md` 48rem, `lg` 64rem, `xl` 80rem, `2xl` 96rem. `md` (48rem) is the only shell breakpoint. The supported minimum width is 320px, and the container keeps `max-w-prose` on wide screens.
