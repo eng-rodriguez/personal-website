@@ -18,6 +18,27 @@ describe("shell documentation", () => {
     expect(section).toContain("primaryNav");
   });
 
+  it("test_ac12_design_system_describes_the_mobile_menu", () => {
+    const doc = read("docs/design-system.md");
+    const section = doc.slice(doc.indexOf("## Global shell"));
+    for (const term of [
+      "pointerdown",
+      "Escape",
+      "outside",
+      "scroll lock",
+      "data-menu-toggle",
+      "print",
+    ]) {
+      expect(section, term).toContain(term);
+    }
+  });
+
+  it("test_ac12_testing_doc_describes_the_mobile_smoke_test", () => {
+    const doc = read("docs/testing.md");
+    expect(doc).toContain("mobile-navigation.spec.ts");
+    expect(doc).toContain("375");
+  });
+
   it("test_ac10_claude_md_describes_shell_and_core_routes", () => {
     const doc = read("CLAUDE.md");
     for (const route of [

@@ -248,6 +248,24 @@ describe("globals.css structure", () => {
   });
 });
 
+describe("no-JavaScript menu", () => {
+  it("test_ac10_shows_links_and_hides_menu_without_js", () => {
+    const find = (selector: string) => {
+      let found: Rule | undefined;
+      root.walkRules((r) => {
+        if (r.selector === selector) found = r;
+      });
+      return found;
+    };
+    const button = find("html:not([data-js]) [data-menu-toggle]");
+    const links = find("html:not([data-js]) [data-primary-nav]");
+    expect(button && declarations(button).get("display")).toBe("none");
+    expect(links && declarations(links).get("display")).toBe("block");
+    expect(button?.parent).toBe(root);
+    expect(links?.parent).toBe(root);
+  });
+});
+
 describe("design tokens", () => {
   it("declares the same color tokens in both themes", () => {
     const names = (theme: Map<string, string>) =>

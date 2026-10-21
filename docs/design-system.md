@@ -67,7 +67,12 @@ When a pair fails, change only the lightness of the token.
 
 - Landmarks: the root layout renders one skip link, a `header` (banner), a `nav` named "Primary", one `main#main-content` and a `footer` (contentinfo). Pages render content only and never their own `main`.
 - Container: `containerClassName` in `src/components/site/container.ts` (`max-w-prose` reading width, `px-6`), shared by the header, `main` and the footer.
-- Breakpoint: `md` (48rem). Below it the navigation is a disclosure (Menu button with `aria-expanded` and `aria-controls`) that closes on link choice, pathname change, Escape (focus returns to the toggle) and widening past `md`. At `md` and wider the links are always visible.
+- Mobile menu: below `md` (48rem) the navigation is a non-modal disclosure (Menu button with `aria-expanded` and `aria-controls`, the links in the page flow). At `md` and wider the links are always visible.
+  - No focus trap, no `inert` and no scroll lock: the page always scrolls and nothing sets `overflow` on `html` or `body`.
+  - Dismissal: Escape anywhere, an outside `pointerdown` (outside the site header; touch closes on the tap, so a scroll gesture leaves it open), link choice, pathname change and widening past `md`. Presses on the Menu button, the theme toggle and the site name never count as outside. Listeners exist only while the menu is open.
+  - Focus: opening does not move focus. Escape returns focus to the Menu button. After an outside press, focus returns to the Menu button only if it was in the menu and the press left it nowhere. A plain link choice focuses `main#main-content`. Back or forward with focus in the menu focuses `main`. Modified clicks (Ctrl, Cmd, Shift, Alt, non-primary button) leave the menu open.
+  - Without JavaScript: `globals.css` hides `[data-menu-toggle]` and shows `[data-primary-nav]` until `data-js` is set, so the links are visible at every width.
+  - Print: the Menu button is hidden (`print:hidden`).
 - Active link rule: `isActive` in `src/lib/navigation.ts` (Home exact, sections exact or nested, pathname only). The active link has `aria-current="page"`, an underline and semibold weight, never color alone.
 - Skip link: the only allowed plain `focus:` utilities, used for visibility and position. The indicator stays the global outline.
 - Adding a core route: add it to `primaryNav`, add its page with a `metadata.title`, and update ADR 0003.
@@ -179,8 +184,8 @@ Tailwind v4 defaults, not redefined: `sm` 40rem, `md` 48rem, `lg` 64rem, `xl` 80
 Manual check for each core route (jsdom has no layout):
 
 - At 320px, at 1280px with 200% zoom, at 667 by 375 and at 1920px: no horizontal scrollbar, nothing clipped or overlapped, links and toggle options 40px tall.
-- At 320px open the menu and change the theme: both work, and the menu closes on Escape, link choice and widening past `md`.
-- With JavaScript disabled: the page follows the OS, no theme control or gap is shown, and links work at `md` and wider.
+- At 320px open the menu and change the theme: both work, and the menu closes on Escape, outside tap, link choice and widening past `md`.
+- With JavaScript disabled: the page follows the OS, no theme control or gap is shown, and links work at every width.
 
 ## Reduced motion
 

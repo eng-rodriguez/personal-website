@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
+import { mainContentId } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import { containerClassName } from "./container";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
-
-export const mainContentId = "main-content";
 
 export function SiteShell({ children }: { children: ReactNode }) {
   return (

@@ -1,3 +1,5 @@
+export const mainContentId = "main-content";
+
 export type NavItem = { readonly href: string; readonly label: string };
 
 export const primaryNav = [

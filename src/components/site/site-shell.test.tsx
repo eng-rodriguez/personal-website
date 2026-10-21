@@ -6,6 +6,7 @@ import Projects from "@/app/projects/page";
 import Resume from "@/app/resume/page";
 import Writing from "@/app/writing/page";
 import { SiteShell } from "@/components/site/site-shell";
+import { primaryNav } from "@/lib/navigation";
 import { site } from "@/lib/site";
 
 vi.mock("next/navigation", () => ({ usePathname: vi.fn() }));
@@ -117,5 +118,30 @@ describe("SiteShell theme toggle", () => {
     const order = [brand, firstRadio, menu].map((el) => focusable.indexOf(el));
     expect(order.every((i) => i >= 0)).toBe(true);
     expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
+  it("test_ac2_tab_order_menu_then_links_in_order", () => {
+    const { container } = render(
+      <SiteShell>
+        <Home />
+      </SiteShell>,
+    );
+
+    const focusable = [
+      ...container.querySelectorAll(
+        'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      ),
+    ];
+    const menu = focusable.indexOf(
+      screen.getByRole("button", { name: "Menu" }),
+    );
+    expect(menu).toBeGreaterThanOrEqual(0);
+    const next = focusable
+      .slice(menu + 1, menu + 1 + primaryNav.length)
+      .map((el) => el.getAttribute("href"));
+    expect(next).toEqual(primaryNav.map((item) => item.href));
+    expect(focusable[menu + 1]).toBe(
+      screen.getByRole("link", { name: "Home" }),
+    );
   });
 });
