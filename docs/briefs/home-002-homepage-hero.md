@@ -308,3 +308,21 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
 - Manual verification: not started (owner)
 - Remaining blockers: owner manual verification; CI `web`, `e2e`, `scope`, `ci-ok` after the PR exists
 - Next action: owner reviews, commits and opens the PR
+
+## Manual verification
+Run by a human on a fresh clone of `feat/home-002-homepage-hero` with Node.js 24. This section consolidates the "Manual verification" steps in section 9 and adds the 667 by 375 landscape check. Automated results by the test agent: `npm run check` exit 0 (30 files, 389 tests), `npm run e2e` exit 0 (18 passed). That does not replace the human run.
+
+Prerequisites: `nvm use`, `npm ci`, `npx playwright install chromium` (once), Chrome or Edge with DevTools (device toolbar, Rendering panel: `prefers-color-scheme`, `forced-colors`, print emulation). Unless stated, run `npm run build && npm run start` and open http://localhost:3000/.
+
+1. Scope. Run `git status --short` and `git diff --name-only origin/main...HEAD`. Expected: `AGENTS.md` and `docs/reviews/dependabot-actions-pr-34.md` are untracked and not staged; every changed path is exempt (`docs/*`, tests, `e2e/*`) or in section 11. Covers AC12.
+2. Checks. Run `npm run check; echo $?` then `npm run e2e; echo $?`. Expected: both print `0` (only the 3 known ESLint `ERESOLVE` notices). Then `git diff --stat origin/main -- package.json package-lock.json next.config.ts tsconfig.json eslint.config.mjs playwright.config.ts src/app/globals.css src/app/globals.test.ts` prints nothing. Covers AC11.
+3. Built HTML. Run `grep -o '<h1' .next/server/app/index.html | wc -l` and `grep -c 'data-slot="hero"' .next/server/app/index.html`. Expected: `1` and `1`. Covers AC1.
+4. Keyboard. Set the theme to Light, then Dark. Click the address bar, press Tab repeatedly on `/`. Expected: skip link, brand, Theme group, five nav links, then "View projects", then "Read writing", each CTA with a visible outline; Enter on a focused CTA opens `/projects` or `/writing` with its own heading; a mouse click shows no outline. Covers AC4 and AC5.
+5. 320px and zoom. DevTools device toolbar at 320 wide; then 1280 wide with browser zoom 200%; then 1920. Expected: no horizontal scrollbar; both CTAs fully visible (side by side or wrapped); text wraps. Covers AC6.
+6. Landscape phone. Device toolbar at 667 by 375. Expected: name, role, statement and both CTAs reachable by scrolling vertically only; no horizontal scroll; CTAs not clipped. Covers AC6 and the layout edge case.
+7. Long copy and portrait (temporary). Edit `site.hero` in `src/lib/site.ts`: a 300-character statement, a 60-character unbroken role, and `portrait: { src: "/test.jpg", alt: "Test portrait", width: 400, height: 500 }` with any local image at `public/test.jpg`. Run `npm run dev` and check at 320px and 640px. Expected: text wraps; the portrait is below the text under 640px and to the right from 640px; nothing overflows. Remove the portrait to confirm no empty slot remains. Then discard: `git checkout -- src/lib/site.ts && rm -rf public`. Covers AC8 and the long-copy edge case.
+8. Forced colors and print. Emulate `forced-colors: active`, then print media, on `/`. Expected: both CTAs show a visible boundary; print is light. Covers AC9.
+9. No JavaScript. DevTools command menu, "Disable JavaScript", reload `/`. Expected: same content and layout; both CTAs navigate. Covers AC7.
+10. Docs. Read "Hero" in `docs/design-system.md` and "Current state" in `CLAUDE.md`. Expected: config shape, how to edit copy, portrait rule, CTA rules (about 20 characters, internal core routes, one primary), keyboard and mobile checks. Covers AC10.
+
+Rollback: `git revert -m 1 <merge-sha>` through a PR, then repeat step 2. Expected: `/` shows PageHeading with `site.name` and `site.description` again; `src/components/site/hero.tsx` and `src/lib/hero.ts` are gone. No flag exists.
