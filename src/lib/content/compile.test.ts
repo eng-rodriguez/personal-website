@@ -2,7 +2,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, describe, expect, it } from "vitest";
-import { ContentError } from "@/lib/content/collection";
+import { ContentError } from "@/lib/content/errors";
 import { compileContent } from "@/lib/content/compile";
 
 const file = "content/articles/sample.mdx";
@@ -49,6 +49,19 @@ describe("compileContent", () => {
     const error = await compileContent(body, { file, components }).catch(
       (e) => e,
     );
+    expect(error).toBeInstanceOf(ContentError);
+    expect(error.message).toContain(file);
+  });
+
+  it.each([
+    ["nested html script", "<Note><script /></Note>"],
+    ["nested expression", "<Note>{x}</Note>"],
+    ["nested unknown component", "<Note><Other /></Note>"],
+  ])("test_ac7_rejects_%s_inside_an_allowed_component", async (_n, body) => {
+    const error = await compileContent(body, {
+      file,
+      components: { Note },
+    }).catch((e) => e);
     expect(error).toBeInstanceOf(ContentError);
     expect(error.message).toContain(file);
   });

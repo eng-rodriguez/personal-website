@@ -1,6 +1,6 @@
 import type { ComponentType, ReactElement } from "react";
 import { compileMDX } from "next-mdx-remote/rsc";
-import { ContentError } from "@/lib/content/collection";
+import { ContentError } from "@/lib/content/errors";
 
 /** Allowlist of components MDX bodies may use, keyed by JSX name. */
 export type ContentComponents = Readonly<
@@ -20,10 +20,10 @@ type MdastNode = {
 
 type Rejection = { error?: ContentError };
 
-function where(node: MdastNode): string {
+function where(node: MdastNode, lineOffset: number): string {
   const start = node.position?.start;
   return start?.line
-    ? ` (line ${start.line}, column ${start.column ?? 1})`
+    ? ` (line ${start.line + lineOffset}, column ${start.column ?? 1})`
     : "";
 }
 
@@ -62,6 +62,7 @@ function problemWith(node: MdastNode, allowed: readonly string[]) {
  */
 function rejectUnsafeMdx(options: {
   file: string;
+  lineOffset: number;
   allowed: readonly string[];
   rejection: Rejection;
 }) {
@@ -73,7 +74,7 @@ function rejectUnsafeMdx(options: {
           {
             file: options.file,
             field: "(body)",
-            message: `${problem}${where(node)}`,
+            message: `${problem}${where(node, options.lineOffset)}`,
           },
         ]);
         options.rejection.error = error;
@@ -88,10 +89,15 @@ function rejectUnsafeMdx(options: {
 /**
  * Compiles an MDX body on the server. Any expression, import, export or JSX
  * element outside `components` throws a ContentError naming `file`.
+ * `lineOffset` (lines before the body in the file) makes positions file-relative.
  */
 export async function compileContent(
   body: string,
-  { file, components }: { file: string; components: ContentComponents },
+  {
+    file,
+    components,
+    lineOffset = 0,
+  }: { file: string; components: ContentComponents; lineOffset?: number },
 ): Promise<ReactElement> {
   const rejection: Rejection = {};
   try {
@@ -106,7 +112,7 @@ export async function compileContent(
           remarkPlugins: [
             [
               rejectUnsafeMdx,
-              { file, allowed: Object.keys(components), rejection },
+              { file, lineOffset, allowed: Object.keys(components), rejection },
             ],
           ],
         },

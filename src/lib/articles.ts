@@ -13,14 +13,14 @@ import {
 } from "@/lib/content/schema";
 
 export type { ContentMode, ContentOptions };
-export { ContentError } from "@/lib/content/collection";
+export { ContentError } from "@/lib/content/errors";
 
 const coverSchema = z.strictObject({
   src: z
     .string()
-    .refine(
-      (value) => value.startsWith("/") && !value.startsWith("//"),
-      "must be a path starting with a single /",
+    .regex(
+      /^\/(?![/\\])[^\s\\]*$/,
+      "must be a path starting with a single /, without spaces or backslashes",
     ),
   alt: nonEmptyText,
 });
@@ -78,14 +78,19 @@ function load({ directory, mode }: ContentOptions = {}) {
   });
 }
 
+/** Locale-independent ordering by UTF-16 code unit. */
+function compareCodePoints(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 /** Published Articles, newest first, then by slug. Server only. */
 export function getArticles(options?: ContentOptions): readonly Article[] {
   return load(options)
     .map((entry) => entry.data)
     .sort(
       (a, b) =>
-        b.publishedAt.localeCompare(a.publishedAt) ||
-        a.slug.localeCompare(b.slug),
+        compareCodePoints(b.publishedAt, a.publishedAt) ||
+        compareCodePoints(a.slug, b.slug),
     );
 }
 
@@ -104,6 +109,7 @@ export async function compileArticle(
   if (!entry) return undefined;
   const content = await compileContent(entry.body, {
     file: entry.file,
+    lineOffset: entry.bodyLineOffset,
     components: articleComponents,
   });
   return { article: entry.data, content };

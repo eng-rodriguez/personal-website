@@ -1,15 +1,15 @@
 import { parse } from "yaml";
-import { ContentError } from "@/lib/content/collection";
+import { ContentError } from "@/lib/content/errors";
 
 /**
  * Splits a leading `---` Frontmatter block from the body and parses it as
- * YAML. The core schema keeps `2026-03-10` a string. Throws a ContentError
+ * YAML. `bodyLineOffset` is the number of file lines before the body. The core schema keeps `2026-03-10` a string. Throws a ContentError
  * naming `file`.
  */
 export function splitFrontmatter(
   source: string,
   file: string,
-): { data: unknown; body: string } {
+): { data: unknown; body: string; bodyLineOffset: number } {
   const text = source.startsWith("\uFEFF") ? source.slice(1) : source;
   const lines = text.split("\n");
   const fail = (message: string): never => {
@@ -43,5 +43,9 @@ export function splitFrontmatter(
       cause: error,
     });
   }
-  return { data, body: lines.slice(end + 1).join("\n") };
+  return {
+    data,
+    body: lines.slice(end + 1).join("\n"),
+    bodyLineOffset: end + 1,
+  };
 }

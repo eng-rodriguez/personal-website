@@ -1,50 +1,20 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { basename, join, relative, resolve } from "node:path";
 import type { z } from "zod";
+import { ContentError } from "@/lib/content/errors";
+import type { ContentIssue } from "@/lib/content/errors";
 import { splitFrontmatter } from "@/lib/content/frontmatter";
 
 export type ContentMode = "production" | "development";
 export type ContentOptions = { directory?: string; mode?: ContentMode };
-
-export type ContentIssue = {
-  readonly file: string;
-  readonly field?: string;
-  readonly message: string;
-};
-
-function formatIssues(issues: readonly ContentIssue[]): string {
-  const files = new Map<string, ContentIssue[]>();
-  for (const issue of issues) {
-    files.set(issue.file, [...(files.get(issue.file) ?? []), issue]);
-  }
-  const lines = [
-    `Invalid content (${files.size} ${files.size === 1 ? "file" : "files"}):`,
-  ];
-  for (const [file, fileIssues] of files) {
-    lines.push(`  ${file}`);
-    for (const { field, message } of fileIssues) {
-      lines.push(`    - ${field ? `${field}: ` : ""}${message}`);
-    }
-  }
-  return lines.join("\n");
-}
-
-/** One error listing every invalid file and field. */
-export class ContentError extends Error {
-  readonly issues: readonly ContentIssue[];
-
-  constructor(issues: readonly ContentIssue[], options?: { cause?: unknown }) {
-    super(formatIssues(issues), options);
-    this.name = "ContentError";
-    this.issues = issues;
-  }
-}
 
 export type CollectionEntry<T> = {
   readonly data: Readonly<T>;
   /** Path relative to process.cwd(), for messages. */
   readonly file: string;
   readonly body: string;
+  /** Lines before the body in the file, to report file-relative positions. */
+  readonly bodyLineOffset: number;
 };
 
 // Entries of different content types share the map; the key includes the
@@ -90,7 +60,7 @@ function loadUncached<S extends z.ZodType<{ slug: string; draft: boolean }>>(
   for (const name of readFileNames(directory)) {
     const path = join(directory, name);
     const file = displayPath(path);
-    let parsed: { data: unknown; body: string };
+    let parsed: { data: unknown; body: string; bodyLineOffset: number };
     try {
       parsed = splitFrontmatter(readFileSync(path, "utf8"), file);
     } catch (error) {
@@ -142,7 +112,12 @@ function loadUncached<S extends z.ZodType<{ slug: string; draft: boolean }>>(
     }
 
     if (slugMismatch) issues.push(slugMismatch);
-    entries.push({ data: result.data, file, body: parsed.body });
+    entries.push({
+      data: result.data,
+      file,
+      body: parsed.body,
+      bodyLineOffset: parsed.bodyLineOffset,
+    });
   }
 
   const bySlug = new Map<string, string[]>();

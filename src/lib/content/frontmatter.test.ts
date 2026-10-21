@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { ContentError } from "@/lib/content/collection";
+import { ContentError } from "@/lib/content/errors";
+import { compileContent } from "@/lib/content/compile";
 import { splitFrontmatter } from "@/lib/content/frontmatter";
 
 const file = "content/articles/x.mdx";
@@ -14,7 +15,20 @@ describe("splitFrontmatter", () => {
     expect(splitFrontmatter(source, file)).toEqual({
       data: { title: "A" },
       body,
+      bodyLineOffset: 3,
     });
+  });
+
+  it("test_ac2_body_line_offset_matches_the_file_line", async () => {
+    const source = "---\ntitle: A\ntags: []\n---\nok\n\n{process.env.X}\n";
+    const { body, bodyLineOffset } = splitFrontmatter(source, file);
+    const error = await compileContent(body, {
+      file,
+      components: {},
+      lineOffset: bodyLineOffset,
+    }).catch((e) => e);
+    // `{process.env.X}` is line 7 of the file.
+    expect(error.message).toContain("line 7");
   });
 
   it("test_ac2_keeps_unquoted_dates_as_strings", () => {

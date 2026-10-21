@@ -46,7 +46,7 @@ No database and no migrations. The model is the Article schema and its invariant
   | `tags` | `tagsSchema` (D3) | `[]` |
   | `draft` | boolean | `false` |
   | `featured` | boolean | `false` |
-  | `cover` | `z.strictObject({ src, alt })`: `src` a string starting with `/` and not `//`, `alt` non-empty | absent |
+  | `cover` | `z.strictObject({ src, alt })`: `src` a string matching `/^\/(?![/\\])[^\s\\]*$/` (single leading `/`, no spaces, control characters or backslashes), `alt` non-empty | absent |
 
   - `updatedAt >= publishedAt` is a `superRefine` on the object with `path: ["updatedAt"]`. Plain string comparison is correct for validated `YYYY-MM-DD` strings.
   - Exported types, inferred from the schema:
@@ -220,7 +220,7 @@ Not applicable. No workflow, Dependabot, environment, deployment or `.factory.ym
 - Data classification: public. Drafts are hidden from the site but are still public in the GitHub repository. `docs/content.md` says so: nothing private goes in a draft. Fixtures use `example.com` and placeholder text, never real contact details.
 - Dependencies: three new runtime packages, audited (D1). They run at build time only.
 - Top threats (STRIDE-style):
-  1. Elevation of privilege or information disclosure through code in MDX (`{process.env.X}`, `import`, `export`) executing during `next build`, which could read build secrets or the filesystem. Mitigation: the rejection plugin fails the build before evaluation, `blockJS` and `blockDangerousJS` stay on, and the tests prove no side effect ran.
+  1. Elevation of privilege or information disclosure through code in MDX (`{process.env.X}`, `import`, `export`) executing during `next build`, which could read build secrets or the filesystem. Mitigation: the rejection plugin fails the build before evaluation, `blockJS` and `blockDangerousJS` stay on (`blockDangerousJS` is inert while `blockJS` is true and is kept as defense in depth), and the tests prove no side effect ran.
   2. Tampering or XSS through HTML-like JSX (`<script>`, `<iframe>`, event attributes) or URL schemes in the published HTML. Mitigation: every JSX element outside the (empty) allowlist is rejected, including lowercase tags. Markdown links with `javascript:` URLs are blocked by React 19 when rendering `href`. BLOG-003 owns link and image components and re-checks this when it adds any.
   3. Information disclosure through a draft shipping to production, or a path traversal through a slug. Mitigation: the draft filter keys on `NODE_ENV === "production"`, which is set for `next build`, `next start` and Vercel previews; tests cover all three API functions. Slugs are looked up, not joined into paths.
 
@@ -299,6 +299,7 @@ Dependencies (factory:react-builder):
 
 Application (factory:react-builder):
 - `src/lib/content/schema.ts` (new)
+- `src/lib/content/errors.ts` (new: `ContentError`, `ContentIssue`, `formatIssues`; added in review round 1, approved by @eng-rodriguez)
 - `src/lib/content/frontmatter.ts` (new)
 - `src/lib/content/collection.ts` (new)
 - `src/lib/content/compile.ts` (new)
@@ -374,8 +375,8 @@ Explicitly not changed: `next.config.ts`, `tsconfig.json`, `vitest.config.mts`, 
   - `npm ls zod`: direct `zod@4.6.5`; the transitive copies under `eslint-plugin-react-hooks` and `zod-validation-error` are deduped to 4.6.5.
   - Component allowlist type: `ContentComponents = Readonly<Record<string, ComponentType<Record<string, unknown>>>>` was accepted by `compileMDX` without a cast.
   - Deviation: `updatedAt >= publishedAt` uses `.refine(..., { when: () => true })` instead of `superRefine`, because Zod 4 skips object refinements when another field is invalid. The loader also reports a slug/filename mismatch when other fields are invalid.
-- Check evidence: `npm run check` exit 0 (34 test files, 441 tests, build lists `/writing` as ○); `npm run e2e` exit 0 (11 passed); `npm audit --audit-level=high --omit=dev` exit 0 (0 vulnerabilities); `git diff --stat -- e2e` empty. The full `npm audit` reports 5 high dev-only vulnerabilities (`braces` via eslint-config-next), not caused by this change.
-- Repairs used: 0 of 3
+- Check evidence: `npm run check` exit 0 (34 test files, 441 tests at the first run; 449 tests after repair round 1, build lists `/writing` as ○); `npm run e2e` exit 0 (11 passed); `npm audit --audit-level=high --omit=dev` exit 0 (0 vulnerabilities); `git diff --stat -- e2e` empty. The full `npm audit` reports 5 high dev-only vulnerabilities (`braces` via eslint-config-next), not caused by this change.
+- Repairs used: 1 of 3 (review round 1: cover.src rule, file-relative MDX error lines, nested-construct test and blockDangerousJS note, code-point slug ordering, `src/lib/content/errors.ts` split)
 - Manual verification: steps 4 to 6 run by the builder agent (bad file: build fails naming `content/articles/bad-article.mdx`, `title` and `publishedAt`, the slug mismatch is covered by `articles.test.ts` after a loader fix made late; duplicate: both files named; unsafe body, draft or not: `articles-content.test.ts` fails naming file and construct; draft-only: build passes with EmptyState). Human run pending.
 - Remaining blockers: none
 - Next action: review, then the owner's manual run (steps 1 to 3, 7, 8)

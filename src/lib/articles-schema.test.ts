@@ -55,6 +55,21 @@ describe("articleFrontmatterSchema", () => {
       { ...valid, cover: { src: "//host/a.png", alt: "a" } },
       "cover.src",
     ],
+    [
+      "backslash cover src",
+      { ...valid, cover: { src: "/\\host/x.png", alt: "a" } },
+      "cover.src",
+    ],
+    [
+      "cover src with a space",
+      { ...valid, cover: { src: "/a b.png", alt: "a" } },
+      "cover.src",
+    ],
+    [
+      "cover src with a tab",
+      { ...valid, cover: { src: "/a\tb.png", alt: "a" } },
+      "cover.src",
+    ],
     ["cover without alt", { ...valid, cover: { src: "/a.png" } }, "cover.alt"],
     [
       "updatedAt before publishedAt",

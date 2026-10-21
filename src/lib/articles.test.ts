@@ -123,6 +123,17 @@ describe("getArticles", () => {
     );
   });
 
+  it("test_ac5_same_date_orders_slugs_by_code_point", () => {
+    const dir = tempDir();
+    for (const slug of ["ab", "a-b", "a-c"]) {
+      writeFileSync(
+        join(dir, `${slug}.mdx`),
+        `---\nslug: ${slug}\ntitle: T\ndescription: d\npublishedAt: 2026-01-01\n---\nx\n`,
+      );
+    }
+    expect(slugs({ directory: dir })).toEqual(["a-b", "a-c", "ab"]);
+  });
+
   it("test_ac2_slug_mismatch_is_reported_with_other_field_errors", () => {
     const dir = tempDir();
     writeFileSync(

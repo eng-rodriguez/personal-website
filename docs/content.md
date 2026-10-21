@@ -34,7 +34,7 @@ cover:
 | `tags` | Kebab-case words, no duplicates | `[]` |
 | `draft` | `true` or `false` | `false` |
 | `featured` | `true` or `false` | `false` |
-| `cover` | `src` (a path under `public/`, starting with a single `/`) and a non-empty `alt` | none |
+| `cover` | `src` (a path under `public/`, starting with a single `/`, with no spaces, control characters or backslashes) and a non-empty `alt` | none |
 
 Unknown keys are rejected. The existence of the `cover` file is not checked yet.
 
