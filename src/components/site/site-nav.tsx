@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { isActive, mainContentId, primaryNav } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +27,15 @@ export function SiteNav({ actions }: { actions?: ReactNode }) {
     setRenderedPath(pathname);
     setOpen(false);
   }
+
+  // Next.js renders on popstate before a popstate listener can be relied on,
+  // and hiding the nav would drop focus to body. When the path changes while
+  // focus is still inside the nav, move it to main.
+  useLayoutEffect(() => {
+    if (navRef.current?.contains(document.activeElement)) {
+      document.getElementById(mainContentId)?.focus({ preventScroll: true });
+    }
+  }, [renderedPath]);
 
   useEffect(() => {
     const ref = pendingRestoreRef;
@@ -127,6 +142,8 @@ export function SiteNav({ actions }: { actions?: ReactNode }) {
       pendingTouchRef.current = remove;
     }
 
+    // Registered in the capture phase: Next.js re-renders on popstate, which
+    // closes the menu and removes this listener before a bubble listener runs.
     function onPopState() {
       if (navRef.current?.contains(document.activeElement)) {
         document.getElementById(mainContentId)?.focus({ preventScroll: true });
@@ -134,10 +151,10 @@ export function SiteNav({ actions }: { actions?: ReactNode }) {
     }
 
     document.addEventListener("pointerdown", onPointerDown, true);
-    window.addEventListener("popstate", onPopState);
+    window.addEventListener("popstate", onPopState, true);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown, true);
-      window.removeEventListener("popstate", onPopState);
+      window.removeEventListener("popstate", onPopState, true);
     };
   }, [open]);
 

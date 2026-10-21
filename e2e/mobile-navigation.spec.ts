@@ -271,3 +271,23 @@ test("/ print hides the Menu button at 375px and 1024px", async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 768 });
   await expect(menu(page), "/ print at 1024").toBeHidden();
 });
+
+test("/ Back after a client navigation with focus on a menu link moves focus to main", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  await menu(page).click();
+  await nav(page).getByRole("link", { name: "Writing" }).click();
+  await expect(page, "/writing after click").toHaveURL(/\/writing$/);
+  await menu(page).click();
+  await nav(page).getByRole("link", { name: "Projects" }).focus();
+
+  await page.evaluate(() => history.back());
+  await expect(page, "/ after Back").toHaveURL(/\/$/);
+  await expect(menu(page), "/ menu after Back").toHaveAttribute(
+    "aria-expanded",
+    "false",
+  );
+  expect(await focusInMain(page), "/ focus in main after Back").toBe(true);
+});
