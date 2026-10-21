@@ -11,10 +11,11 @@ On phones and narrow windows, the site menu now closes when a visitor taps outsi
 Every visitor on a phone reaches the site's pages through this menu, so it has to work by touch and keyboard without trapping or losing anyone.
 
 ## How we know it works
-- All 384 automated unit tests and all 32 browser tests passed, including new phone-sized and desktop browser tests; the full style, type and build check passed.
+- All 525 automated unit tests and all 40 browser tests passed after the homepage hero and article work were merged in; the full style, type and build check passed.
 - Hands-on checks were run by automation in a desktop browser imitating a phone (touch, print, high-contrast and narrow zoomed screens): all passed. A real phone, a real screen reader and a real print dialog were not tried.
 - Those checks found that pressing Back with a menu link focused lost the visitor's place. It was fixed, and a follow-up fix stopped the change from affecting the desktop menu. Both are covered by new tests.
-- Three independent reviews (requirements, design and security) found no critical issues. One important design note (the menu code could be organised more compactly) and several minor notes were left open, including that older Safari versions skip the Back focus fix.
+- After the homepage hero landed, a tap on an empty part of the page with the menu open could open the hero's "View projects" link. The menu now waits for the tap to finish before closing, and a new test covers it.
+- Three independent reviews (requirements, design and security) found no critical issues. One important design note (the menu code could be organised more compactly) and several minor notes were left open, including that older Safari versions skip the Back focus fix and a rare long-press case that can close the menu early.
 
 ## Not included / deferred
 - A full-screen pop-over menu, which would need its own story.
