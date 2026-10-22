@@ -361,7 +361,7 @@ Explicitly not changed: `next.config.ts`, `tsconfig.json`, `vitest.config.mts`, 
 - Resolved in this brief: exact versions (D1), the shared field schemas (D3), the Frontmatter rules (D4), the loader and cache (D5), the API surface and error format (D6), the rejection of all JSX outside the allowlist including HTML tags (D7), the synchronous `/writing` (D8) and the real-content test (D9).
 
 ## 14. Checkpoint
-- Phase: implemented, awaiting review and manual verification
+- Phase: shipped (eng-rodriguez/personal-website#48 merged as a90a345)
 - Scope: BLOG-001 as in the approved story (A1 to A8) and this brief
 - Baseline: `feat/blog-001-article-schema-mdx-pipeline` to be cut from `origin/main` at e66c548
 - Revisions: none
@@ -377,6 +377,6 @@ Explicitly not changed: `next.config.ts`, `tsconfig.json`, `vitest.config.mts`, 
   - Deviation: `updatedAt >= publishedAt` uses `.refine(..., { when: () => true })` instead of `superRefine`, because Zod 4 skips object refinements when another field is invalid. The loader also reports a slug/filename mismatch when other fields are invalid.
 - Check evidence: `npm run check` exit 0 (34 test files, 441 tests at the first run; 449 tests after repair round 1, build lists `/writing` as ○); `npm run e2e` exit 0 (11 passed); `npm audit --audit-level=high --omit=dev` exit 0 (0 vulnerabilities); `git diff --stat -- e2e` empty. The full `npm audit` reports 5 high dev-only vulnerabilities (`braces` via eslint-config-next), not caused by this change.
 - Repairs used: 1 of 3 (review round 1: cover.src rule, file-relative MDX error lines, nested-construct test and blockDangerousJS note, code-point slug ordering, `src/lib/content/errors.ts` split)
-- Manual verification: steps 4 to 6 run by the builder agent (bad file: build fails naming `content/articles/bad-article.mdx`, `title` and `publishedAt`, the slug mismatch is covered by `articles.test.ts` after a loader fix made late; duplicate: both files named; unsafe body, draft or not: `articles-content.test.ts` fails naming file and construct; draft-only: build passes with EmptyState). Human run pending.
+- Manual verification: steps 4 to 6 run by the builder agent (bad file: build fails naming `content/articles/bad-article.mdx`, `title` and `publishedAt`, the slug mismatch is covered by `articles.test.ts` after a loader fix made late; duplicate: both files named; unsafe body, draft or not: `articles-content.test.ts` fails naming file and construct; draft-only: build passes with EmptyState). Human run: steps 1 to 3 and 7 run by @eng-rodriguez, all as expected. Step 8: `web`, `e2e`, `scope` and `ci-ok` passed on eng-rodriguez/personal-website#48.
 - Remaining blockers: none
-- Next action: review, then the owner's manual run (steps 1 to 3, 7, 8)
+- Next action: none
