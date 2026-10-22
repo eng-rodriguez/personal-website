@@ -173,3 +173,11 @@
 html:not([data-js]) [data-theme-toggle] {
   display: none;
 }
+
+/* Without JavaScript the Menu button cannot work: hide it and show the links. */
+html:not([data-js]) [data-menu-toggle] {
+  display: none;
+}
+html:not([data-js]) [data-primary-nav] {
+  display: block;
+}

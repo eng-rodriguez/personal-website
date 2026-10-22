@@ -41,7 +41,7 @@ Download the `playwright-report-<attempt>` artifact from the run summary and unz
 - Use role locators and web-first assertions. No sleeps.
 - Name the route in the test title and in `expect` messages.
 - Use only built-in fixtures (no `test.extend`). `.only`, `.skip` and `.fixme` fail lint.
-- Chromium only.
+- Chromium only. A viewport-specific spec sets `viewport` and `hasTouch` with file-level `test.use` (example: `e2e/mobile-navigation.spec.ts` at 375 by 667); the default project stays Desktop Chrome.
 - Logic that does not need a browser belongs in Vitest.
 
 ## Upgrading Playwright
