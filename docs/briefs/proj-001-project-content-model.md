@@ -345,7 +345,7 @@ Explicitly not changed: `package.json`, `package-lock.json`, `src/lib/content/fr
 - Baseline: `feat/proj-001-project-content-model` cut from `origin/main` at 1b5c7f5 (docs-only change over bc2317a)
 - Revisions: none
 - Approvals: story, brief and ADR 0007 approved by @eng-rodriguez, including the loader `validate` hook and the shared `coverSchema`
-- Check evidence: none yet
+- Check evidence: test agent run on 90ac066: `npm run check` exit 0 (43 files, 609 tests; `/projects` and `/writing` listed as ○; `projects.html` has one `<h1` and one `data-slot="empty-state"`); `npm run e2e` exit 0 (40 passed; `git diff --stat origin/main -- e2e` empty); AC8 build failure verified with a temporary `content/projects/bad-project.mdx` (exit 1, error names the file, `title`, `endedAt` and the slug mismatch; file removed); AC12 scope-check logic over `git diff --name-only origin/main...HEAD` exit 0. CI `web`, `e2e`, `scope` and `ci-ok` pending the PR.
 - Repairs used: 0 of 3
 - Remaining blockers: none
 - Next action: factory:react-builder implements section 11 on `feat/proj-001-project-content-model`
