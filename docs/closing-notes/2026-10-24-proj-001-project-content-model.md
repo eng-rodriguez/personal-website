@@ -15,7 +15,7 @@ The upcoming projects list, project pages and homepage previews can rely on proj
 - A deliberately broken project file stopped the site build and named the file and each problem.
 - Three independent reviews (requirements, design and security) found no critical or important issues. Nine minor notes were left open as optional improvements.
 - All checks also passed on GitHub's servers. A newly published security notice for a validation library stopped those checks at first; it was fixed separately by moving to the patched version before this change was merged.
-- The owner's hands-on review of the new documentation was not recorded.
+- After the merge, the hands-on checks were repeated on the merged code and the new documentation was reviewed against the plan: no gaps, five minor notes. This was done by the development tooling, not the owner, whose own review is not recorded.
 
 ## Not included / deferred
 - The projects list, project pages, image and link display, and homepage previews (separate tickets).

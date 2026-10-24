@@ -340,12 +340,27 @@ Explicitly not changed: `package.json`, `package-lock.json`, `src/lib/content/fr
 - Builder-verified at implementation: the items listed in section 9.
 
 ## 14. Checkpoint
-- Phase: brief approved, implementation
+- Phase: shipped; eng-rodriguez/personal-website#53 merged to `main` as a411c89 on 2026-10-24
 - Scope: PROJ-001 as in the approved story (A1 to A10, with fixtures only, `endedAt` optional and forbidden while `active`, extra `##` sections allowed with `caseStudy`) and this brief
 - Baseline: `feat/proj-001-project-content-model` cut from `origin/main` at 1b5c7f5 (docs-only change over bc2317a)
-- Revisions: none
+- Revisions: branch head 8537f5e (after merging `main` with the zod 4.6.6 fix from eng-rodriguez/personal-website#54), squash-merged as a411c89
 - Approvals: story, brief and ADR 0007 approved by @eng-rodriguez, including the loader `validate` hook and the shared `coverSchema`
-- Check evidence: test agent run on 90ac066: `npm run check` exit 0 (43 files, 609 tests; `/projects` and `/writing` listed as ○; `projects.html` has one `<h1` and one `data-slot="empty-state"`); `npm run e2e` exit 0 (40 passed; `git diff --stat origin/main -- e2e` empty); AC8 build failure verified with a temporary `content/projects/bad-project.mdx` (exit 1, error names the file, `title`, `endedAt` and the slug mismatch; file removed); AC12 scope-check logic over `git diff --name-only origin/main...HEAD` exit 0. CI `web`, `e2e`, `scope` and `ci-ok` pending the PR.
+- Check evidence: test agent run on 90ac066: `npm run check` exit 0 (43 files, 609 tests; `/projects` and `/writing` listed as ○; `projects.html` has one `<h1` and one `data-slot="empty-state"`); `npm run e2e` exit 0 (40 passed; `git diff --stat origin/main -- e2e` empty); AC8 build failure verified with a temporary `content/projects/bad-project.mdx` (exit 1, error names the file, `title`, `endedAt` and the slug mismatch; file removed); AC12 scope-check logic over `git diff --name-only origin/main...HEAD` exit 0.
+- CI on eng-rodriguez/personal-website#53: the first run failed only at `npm audit` (GHSA-mrhx-c7xc-m3w5 in `zod` 4.6.5, unchanged from `main`; see `docs/reviews/zod-4-6-6-audit.md`). After eng-rodriguez/personal-website#54 and the merge of `main`, `web`, `e2e`, `scope`, `secrets`, `pr-format` and `ci-ok` passed.
+- Manual verification steps 2 to 6 and 8: run by the development agent on 2026-10-24 in a clean worktree of `main` at a411c89 (Node.js 24.19.0), not by the owner. The temporary content files were removed and the worktree deleted.
+  - Step 1: not applicable after merge; the CI `scope` job passed.
+  - Step 2: `npm ci` exit 0 with the 3 known `ERESOLVE` notices.
+  - Step 3: `npm run check` exit 0 (43 files, 609 tests; `/projects` and `/writing` listed as ○; `projects.html` has one `data-slot="empty-state"`); `npm run e2e` exit 0 (40 passed).
+  - Step 4: `bad-project.mdx` failed the build naming the file, `title`, `endedAt` and the slug mismatch; the `first-project.mdx` and `copy.mdx` pair failed naming both files.
+  - Step 5: missing `## Outcome` failed naming it; `## Outcome` before `## Problem` failed naming the order and line numbers; the correct order built, with one `<h1` and no EmptyState in `projects.html`; the draft without `## Outcome` still failed.
+  - Step 6: `npm test` failed in `projects-content.test.ts` naming `unsafe-project.mdx` and the expression; `npm run build` passed. Not listed in the step: `core-pages.test.tsx` (`test_ac9_shows_the_empty_state_only_on_placeholder_pages`) also failed, because any published Project removes the `/projects` EmptyState. Expected behavior, not a defect; PROJ-002 has to update that test when it renders the list.
+  - Step 8: as in the CI line above.
+- Step 7 (docs, marked human only): reviewed by the development agent against section 10, not by the owner; the owner's own review is not recorded. ADR 0007, `docs/content.md`, `docs/domain.md`, `docs/testing.md` and the CLAUDE.md Current state, Approved decisions, Unresolved architecture, Ownership and contracts and Paths contain every item in section 10. Minor notes, none blocking:
+  - ADR 0003 still says whether a case study is a kind of Project "stays open"; ADR 0007 records that it resolves this, but ADR 0003 has no forward pointer.
+  - `docs/content.md` uses top-level `#` headings for Articles, Projects and Workflow under the `# Content` title.
+  - Step 6 above omits the `core-pages.test.tsx` failure.
+  - `/projects` shows only its heading once a Project exists, until PROJ-002 renders the list.
+  - ADR 0007 is dated 2026-10-21, the story approval date; the brief was approved on 2026-10-24.
 - Repairs used: 0 of 3
 - Remaining blockers: none
-- Next action: factory:react-builder implements section 11 on `feat/proj-001-project-content-model`
+- Next action: none for PROJ-001. The owner may still run step 7 personally.
