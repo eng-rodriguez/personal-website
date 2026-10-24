@@ -17,6 +17,16 @@ export type CollectionEntry<T> = {
   readonly bodyLineOffset: number;
 };
 
+/**
+ * Optional per-collection check of an entry whose Frontmatter is valid. Returns
+ * issues (without the file, the loader adds it). Must not throw.
+ */
+export type EntryCheck<T> = (entry: {
+  readonly data: Readonly<T>;
+  readonly body: string;
+  readonly bodyLineOffset: number;
+}) => readonly { readonly field?: string; readonly message: string }[];
+
 // Entries of different content types share the map; the key includes the
 // directory, and each directory holds one type.
 const cache = new Map<string, readonly CollectionEntry<unknown>[]>();
@@ -53,6 +63,7 @@ function loadUncached<S extends z.ZodType<{ slug: string; draft: boolean }>>(
   directory: string,
   schema: S,
   mode: ContentMode,
+  validate?: EntryCheck<z.output<S>>,
 ): CollectionEntry<z.output<S>>[] {
   const issues: ContentIssue[] = [];
   const entries: CollectionEntry<z.output<S>>[] = [];
@@ -112,6 +123,15 @@ function loadUncached<S extends z.ZodType<{ slug: string; draft: boolean }>>(
     }
 
     if (slugMismatch) issues.push(slugMismatch);
+    if (validate) {
+      for (const issue of validate({
+        data: result.data,
+        body: parsed.body,
+        bodyLineOffset: parsed.bodyLineOffset,
+      })) {
+        issues.push({ file, ...issue });
+      }
+    }
     entries.push({
       data: result.data,
       file,
@@ -169,10 +189,12 @@ export function loadCollection<
   directory,
   schema,
   mode,
+  validate,
 }: {
   directory: string;
   schema: S;
   mode: ContentMode;
+  validate?: EntryCheck<z.output<S>>;
 }): readonly CollectionEntry<z.output<S>>[] {
   const useCache = process.env.NODE_ENV === "production";
   const key = `${resolve(directory)}\0${mode}`;
@@ -180,7 +202,7 @@ export function loadCollection<
     const hit = cache.get(key);
     if (hit) return hit as readonly CollectionEntry<z.output<S>>[];
   }
-  const entries = loadUncached(directory, schema, mode);
+  const entries = loadUncached(directory, schema, mode, validate);
   if (useCache) cache.set(key, entries);
   return entries;
 }
