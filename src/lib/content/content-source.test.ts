@@ -9,7 +9,9 @@ const modules = [
   "src/lib/content/frontmatter.ts",
   "src/lib/content/collection.ts",
   "src/lib/content/compile.ts",
+  "src/lib/content/headings.ts",
   "src/lib/articles.ts",
+  "src/lib/projects.ts",
 ];
 
 describe("content sources", () => {
@@ -19,12 +21,13 @@ describe("content sources", () => {
     expect(source).not.toMatch(/: any\b|as any\b|<any>/);
   });
 
-  it.each(["src/lib/articles.ts", "src/lib/content/collection.ts"])(
-    "test_ac6_%s_reads_files_with_node_fs",
-    (path) => {
-      expect(read(path)).toContain("node:");
-    },
-  );
+  it.each([
+    "src/lib/articles.ts",
+    "src/lib/projects.ts",
+    "src/lib/content/collection.ts",
+  ])("test_ac6_%s_reads_files_with_node_fs", (path) => {
+    expect(read(path)).toContain("node:");
+  });
 
   it("test_ac8_collection_imports_node_fs", () => {
     expect(read("src/lib/content/collection.ts")).toContain('from "node:fs"');
@@ -32,6 +35,12 @@ describe("content sources", () => {
 
   it("test_ac8_writing_page_is_a_synchronous_server_component", () => {
     const source = read("src/app/writing/page.tsx");
+    expect(source).not.toMatch(/\basync\b/);
+    expect(source).not.toContain('"use client"');
+  });
+
+  it("test_ac8_projects_page_is_a_synchronous_server_component", () => {
+    const source = read("src/app/projects/page.tsx");
     expect(source).not.toMatch(/\basync\b/);
     expect(source).not.toContain('"use client"');
   });

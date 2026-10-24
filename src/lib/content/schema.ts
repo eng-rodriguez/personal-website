@@ -32,3 +32,14 @@ export const tagsSchema = z
   });
 
 export const nonEmptyText = z.string().trim().min(1, "must not be empty");
+
+/** A site-relative image with alternative text. Shared by Articles and Projects. */
+export const coverSchema = z.strictObject({
+  src: z
+    .string()
+    .regex(
+      /^\/(?![/\\])[^\s\\]*$/,
+      "must be a path starting with a single /, without spaces or backslashes",
+    ),
+  alt: nonEmptyText,
+});

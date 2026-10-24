@@ -57,4 +57,60 @@ describe("content docs", () => {
     expect(doc).toContain("`Article`");
     expect(doc).toContain("`ArticleFrontmatter`");
   });
+
+  it("test_ac10_content_guide_covers_projects", () => {
+    const doc = read("docs/content.md");
+    for (const term of [
+      "content/projects",
+      "summary",
+      "role",
+      "stack",
+      "startedAt",
+      "endedAt",
+      "status",
+      "links",
+      "caseStudy",
+      "## Problem",
+      "## Approach",
+      "## Decisions",
+      "## Outcome",
+    ]) {
+      expect(doc, term).toContain(term);
+    }
+  });
+
+  it("test_ac10_adr_0007_records_the_decision", () => {
+    const doc = read("docs/adr/0007-project-model-with-case-studies.md");
+    for (const term of [
+      "caseStudy",
+      "## Problem",
+      "ADR 0006",
+      "Status: Accepted",
+    ]) {
+      expect(doc, term).toContain(term);
+    }
+  });
+
+  it("test_ac10_claude_md_points_to_the_project_model", () => {
+    const doc = read("CLAUDE.md");
+    for (const term of [
+      "ADR 0007",
+      "content/projects",
+      "src/lib/projects.ts",
+    ]) {
+      expect(doc, term).toContain(term);
+    }
+    const unresolved = doc.slice(doc.indexOf("## Unresolved architecture"));
+    expect(unresolved.slice(0, unresolved.indexOf("## Factory"))).not.toContain(
+      "whether case studies",
+    );
+  });
+
+  it("test_ac10_domain_names_the_project_code", () => {
+    const doc = read("docs/domain.md");
+    expect(doc).toContain("`Project`");
+    expect(doc).toContain("`ProjectFrontmatter`");
+    expect(doc).toContain("caseStudy");
+    expect(doc).not.toContain("whether a case study is a kind of project");
+  });
 });

@@ -6,6 +6,7 @@ import type { ContentComponents } from "@/lib/content/compile";
 import { loadCollection } from "@/lib/content/collection";
 import type { ContentMode, ContentOptions } from "@/lib/content/collection";
 import {
+  coverSchema,
   isoDateSchema,
   nonEmptyText,
   slugSchema,
@@ -14,16 +15,6 @@ import {
 
 export type { ContentMode, ContentOptions };
 export { ContentError } from "@/lib/content/errors";
-
-const coverSchema = z.strictObject({
-  src: z
-    .string()
-    .regex(
-      /^\/(?![/\\])[^\s\\]*$/,
-      "must be a path starting with a single /, without spaces or backslashes",
-    ),
-  alt: nonEmptyText,
-});
 
 export const articleFrontmatterSchema = z
   .strictObject({
