@@ -51,5 +51,5 @@ Keep an exact pin in `package.json` and follow the 2-week rule for new releases.
 ## Content tests
 
 - Content tests run in the node environment (`// @vitest-environment node`).
-- Fixtures live in `src/lib/__fixtures__/articles/<case>/`. Pass `directory` and `mode` to the loader functions instead of changing real content.
-- `src/lib/articles-content.test.ts` validates and compiles the real `content/articles`, drafts included, so invalid content fails `npm run check`.
+- Fixtures live in `src/lib/__fixtures__/articles/<case>/` and `src/lib/__fixtures__/projects/<case>/`. Pass `directory` and `mode` to the loader functions instead of changing real content.
+- `src/lib/articles-content.test.ts` validates and compiles the real `content/articles`, drafts included, so invalid content fails `npm run check`. `src/lib/projects-content.test.ts` does the same for `content/projects`.
