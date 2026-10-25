@@ -43,6 +43,7 @@ Download the `playwright-report-<attempt>` artifact from the run summary and unz
 - Use only built-in fixtures (no `test.extend`). `.only`, `.skip` and `.fixme` fail lint.
 - Chromium only. A viewport-specific spec sets `viewport` and `hasTouch` with file-level `test.use` (example: `e2e/mobile-navigation.spec.ts` at 375 by 667); the default project stays Desktop Chrome.
 - Logic that does not need a browser belongs in Vitest.
+- `content/` is empty, so a spec that depends on content (`e2e/home-previews.spec.ts`) reads the page as rendered and adds a `content` annotation when no section exists. `test.skip` fails lint. To exercise the card checks, copy the `home` fixtures into `content/` temporarily, build and run the spec, then remove the copies and confirm `git status --short content` prints nothing before committing.
 
 ## Upgrading Playwright
 
@@ -53,3 +54,4 @@ Keep an exact pin in `package.json` and follow the 2-week rule for new releases.
 - Content tests run in the node environment (`// @vitest-environment node`).
 - Fixtures live in `src/lib/__fixtures__/articles/<case>/` and `src/lib/__fixtures__/projects/<case>/`. Pass `directory` and `mode` to the loader functions instead of changing real content.
 - `src/lib/articles-content.test.ts` validates and compiles the real `content/articles`, drafts included, so invalid content fails `npm run check`. `src/lib/projects-content.test.ts` does the same for `content/projects`.
+- The `home` case under each type is used by `src/lib/home.test.ts`. Its files are copied into `content/` only for the HOME-003 manual check.

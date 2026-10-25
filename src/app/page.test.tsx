@@ -13,4 +13,13 @@ describe("Home page", () => {
     expect(screen.getByText(site.hero.statement)).toBeInTheDocument();
     expect(screen.queryByRole("main")).toBeNull();
   });
+
+  it("test_ac8_empty_content_renders_only_the_hero", () => {
+    const { container } = render(<Home />);
+
+    expect(screen.queryByRole("heading", { level: 2 })).toBeNull();
+    expect(screen.queryByRole("region")).toBeNull();
+    expect(screen.getAllByRole("link")).toHaveLength(2);
+    expect(container.querySelector('[data-slot="empty-state"]')).toBeNull();
+  });
 });

@@ -63,6 +63,16 @@ describe("Card", () => {
     expect(article.className).not.toContain("dark:");
   });
 
+  it("test_ac11_title_link_has_a_24px_target_and_wraps_long_words", () => {
+    render(<Card title="Site" href="/projects" />);
+    const link = screen.getByRole("link");
+    for (const name of ["inline-block", "max-w-full", "min-h-6", "min-w-6"]) {
+      expect(link).toHaveClass(name);
+    }
+    expect(link.className).not.toContain("outline-none");
+    expect(link.className).not.toMatch(/(^|\s)focus:/);
+  });
+
   it("test_ac4_rejects_h1_and_protocol_relative_hrefs_at_type_level", () => {
     // @ts-expect-error h1 is reserved for PageHeading
     render(<Card title="T" headingLevel="h1" />);

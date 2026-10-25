@@ -44,4 +44,10 @@ describe("content sources", () => {
     expect(source).not.toMatch(/\basync\b/);
     expect(source).not.toContain('"use client"');
   });
+
+  it("test_ac10_home_page_is_a_synchronous_server_component", () => {
+    const source = read("src/app/page.tsx");
+    expect(source).not.toMatch(/\basync\b/);
+    expect(source).not.toContain('"use client"');
+  });
 });
