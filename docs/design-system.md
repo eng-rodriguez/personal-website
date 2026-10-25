@@ -110,7 +110,7 @@ Use to group content under a heading. Props: `title`, `headingLevel?` (default `
 
 ### Card
 
-A static `article`, not clickable as a whole. Props: `title`, `href?`, `headingLevel?` (default `h3`), `description?`, `footer?`, `className?`. With `href` the title is the card's single link (title-link pattern); without it the card is static. The footer is for non-interactive metadata such as Tags and dates, never controls.
+A static `article`, not clickable as a whole. Props: `title`, `href?`, `headingLevel?` (default `h3`), `description?`, `footer?`, `className?`. With `href` the title is the card's single link (title-link pattern), an inline block of at least 24 by 24 CSS pixels that wraps long words; without it the card is static. The footer is for non-interactive metadata such as Tags and dates, never controls.
 
 ```tsx
 <Card
@@ -197,6 +197,18 @@ export type HeroConfig = {
 - CTAs: exactly two, internal core routes from `primaryNav` only (not `/`, not repeated), no `mailto:`, `tel:` or external links. The first uses the primary style and the second the `outline` variant. Keep labels to about 20 characters at most, because variant links do not wrap (the 320px e2e test fails on overflow).
 - Portrait: optional and off by default. To add one, put the file in `public/`, set `src` to its local path, a non-empty `alt`, and the image's real `width` and `height`. Local paths only. It is a plain `img` until a story moves it to `next/image`.
 - Keyboard and mobile checks: Tab reaches the two CTAs after the header, each with a visible outline in Light and Dark; there is no horizontal scroll at 320px and at 1280px with 200% zoom.
+
+## Home previews
+
+After the Hero, `/` renders up to two preview sections from `HomePreviews` (`src/components/site/home-previews.tsx`), which takes the selected lists as props and never loads or filters content. The page wires the loaders to the selection in `src/lib/home.ts`.
+
+- Order: "Featured projects", then "Recent writing". Each is a Section (`h2`) of Cards (`h3`) in a one-column Grid. The Hero name stays the only `h1`.
+- Selection: `selectFeaturedProjects` keeps the Projects with `featured: true` in `getProjects()` order (`startedAt` descending, then slug). `selectRecentArticles` keeps the first Articles of `getArticles()` order (`publishedAt` descending, then slug); the Article `featured` flag is ignored. Both stop at `homePreviewLimit` (3), a constant in code. Drafts are removed by the loaders in production, so a draft never takes a slot.
+- Empty: a section with no items is not rendered: no heading, no EmptyState and no spacing. With both collections empty, `/` shows only the Hero.
+- Project card: title, summary and each `stack` entry as a Tag. Article card: title, description and `publishedAt` in a `<time dateTime>` element. Covers, links, status, role and dates of Projects are not shown.
+- Links: card titles go to `/projects` or `/writing`, and each section ends with a "View all projects" or "View all writing" link to the same page. No card links to a detail route until the detail pages exist.
+- Dates: `formatContentDate` in `src/lib/dates.ts` formats `YYYY-MM-DD` as en-US in UTC, for example `Oct 25, 2026`, so the day never shifts with the time zone.
+- Checks: no horizontal scrollbar at 320px and at 1280px with 200% zoom, Tab reaches each card title and "View all" link in reading order with the outline in Light and Dark, and every link measures at least 24 by 24 CSS pixels.
 
 ## Breakpoints
 
