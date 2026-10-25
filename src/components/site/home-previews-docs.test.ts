@@ -12,8 +12,7 @@ describe("home previews docs", () => {
     expect(start).toBeGreaterThan(-1);
     for (const term of [
       "src/lib/home.ts",
-      "homePreviewLimit",
-      "3",
+      "`homePreviewLimit` (3)",
       "featured",
       "getProjects()",
       "getArticles()",
