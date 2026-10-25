@@ -31,7 +31,16 @@ export function Card<H extends string>({
       )}
     >
       <Heading className="text-base font-semibold wrap-break-word">
-        {href !== undefined ? <Link<H> href={href}>{title}</Link> : title}
+        {href !== undefined ? (
+          <Link<H>
+            href={href}
+            className="inline-block max-w-full min-h-6 min-w-6"
+          >
+            {title}
+          </Link>
+        ) : (
+          title
+        )}
       </Heading>
       {hasText(description) ? (
         <p className="mt-2 text-sm text-muted-foreground wrap-break-word">
