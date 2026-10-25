@@ -2,7 +2,7 @@
 
 **Status:** Ready for review
 **Date:** 2026-10-25 · **Milestone:** none · **Risk:** Standard
-**Links:** Ticket [HOME-003](https://github.com/eng-rodriguez/personal-website/issues/8) · [Story](../stories/home-003-homepage-content-previews.md) · [Brief](../briefs/home-003-homepage-content-previews.md) · PR (to be added)
+**Links:** Ticket [HOME-003](https://github.com/eng-rodriguez/personal-website/issues/8) · [Story](../stories/home-003-homepage-content-previews.md) · [Brief](../briefs/home-003-homepage-content-previews.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/58)
 
 ## What we delivered
 Below the introduction, the home page now shows up to three projects marked as featured and the three most recent articles, each as a short card with a link to its section. The cards come straight from the written content, so publishing a project or article updates the home page with no extra work. While there is nothing to show, a section stays hidden, so today the home page looks exactly as before.
