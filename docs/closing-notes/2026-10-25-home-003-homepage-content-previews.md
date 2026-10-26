@@ -1,6 +1,6 @@
 # The home page now previews featured projects and the latest writing
 
-**Status:** Ready for review
+**Status:** Shipped
 **Date:** 2026-10-25 · **Milestone:** none · **Risk:** Standard
 **Links:** Ticket [HOME-003](https://github.com/eng-rodriguez/personal-website/issues/8) · [Story](../stories/home-003-homepage-content-previews.md) · [Brief](../briefs/home-003-homepage-content-previews.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/58)
 
