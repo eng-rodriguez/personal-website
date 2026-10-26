@@ -113,4 +113,21 @@ describe("content docs", () => {
     expect(doc).toContain("caseStudy");
     expect(doc).not.toContain("whether a case study is a kind of project");
   });
+
+  it("test_ac15_content_guide_states_what_featured_does_on_the_home_page", () => {
+    const doc = read("docs/content.md");
+    expect(doc).toContain("home page");
+    const articles = doc.slice(
+      doc.indexOf("## Frontmatter"),
+      doc.indexOf("## Drafts"),
+    );
+    expect(articles).toContain("does not affect the home page");
+    const projects = doc.slice(
+      doc.indexOf("## Project Frontmatter"),
+      doc.indexOf("## Case studies"),
+    );
+    expect(projects).toContain("selects the Project for the home page");
+    expect(projects).toContain("at most 3");
+    expect(projects).toContain("no ordering field");
+  });
 });

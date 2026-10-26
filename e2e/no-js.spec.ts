@@ -69,4 +69,32 @@ test.describe("without JavaScript", () => {
       "/projects h1",
     ).toHaveText("Projects");
   });
+
+  test("/ without JavaScript renders preview links that navigate", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const main = page.getByRole("main");
+    const regions = main.getByRole("region");
+    if ((await regions.count()) === 0) {
+      test.info().annotations.push({
+        type: "content",
+        description: "no preview sections on /; card checks not exercised",
+      });
+      await expect(main.getByRole("link"), "/ main links").toHaveCount(2);
+      return;
+    }
+    const links = regions.getByRole("link");
+    for (const link of await links.all()) {
+      await expect(link, "/ preview link").toBeVisible();
+    }
+    const first = links.first();
+    const href = await first.getAttribute("href");
+    await first.click();
+    await expect(page, "/ preview link url").toHaveURL(href!);
+    await expect(
+      page.getByRole("heading", { level: 1 }),
+      `${href} h1`,
+    ).toBeVisible();
+  });
 });

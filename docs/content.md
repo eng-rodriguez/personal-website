@@ -35,10 +35,12 @@ cover:
 | `updatedAt` | `YYYY-MM-DD`, not before `publishedAt` | none |
 | `tags` | Kebab-case words, no duplicates | `[]` |
 | `draft` | `true` or `false` | `false` |
-| `featured` | `true` or `false` | `false` |
+| `featured` | `true` or `false`; reserved, it does not affect the home page | `false` |
 | `cover` | `src` (a path under `public/`, starting with a single `/`, with no spaces, control characters or backslashes) and a non-empty `alt` | none |
 
 Unknown keys are rejected. The existence of the `cover` file is not checked yet.
+
+The home page shows the 3 most recent published Articles, newest `publishedAt` first. The Article `featured` flag does not affect it.
 
 ## Drafts
 A draft (`draft: true`) is hidden when `NODE_ENV` is `production` (`next build`, `next start` and Vercel previews) and shown in `npm run dev`. Drafts are still validated. They are still public in the GitHub repository, so put nothing private in one. `publishedAt` does not schedule: a future date is not hidden.
@@ -101,13 +103,15 @@ caseStudy: false
 | `startedAt` | `YYYY-MM-DD`, a real date, no time | required |
 | `endedAt` | `YYYY-MM-DD`, not before `startedAt`, omitted while `status` is `active` | none |
 | `status` | `active`, `completed` or `archived` | required |
-| `featured` | `true` or `false` | `false` |
+| `featured` | `true` or `false`; `true` selects the Project for the home page | `false` |
 | `draft` | `true` or `false` | `false` |
 | `links` | A list of `label`, `url` (absolute `https://` only) and `kind` (`repo`, `live` or `other`); at most one `repo` and one `live` | `[]` |
 | `cover` | Same rules as the Article `cover` | none |
 | `caseStudy` | `true` makes the Project a case study (below) | `false` |
 
 Unknown keys are rejected, also inside `links` and `cover`. Reachability of the links and the existence of the `cover` file are not checked.
+
+The home page shows the Projects with `featured: true`, at most 3, newest `startedAt` first (then by slug). There is no ordering field: to change the choice, change `startedAt` or unset `featured`. Drafts never show in production and do not take one of the 3 slots.
 
 ## Case studies
 A case study is a Project with `caseStudy: true`. Its body must contain these level-2 headings, each exactly once and in this order:

@@ -33,7 +33,10 @@ for (const { label, href } of hero.ctas) {
   test(`/ CTA "${label}" navigates to ${href}`, async ({ page }) => {
     await page.goto("/");
     const main = page.getByRole("main");
-    await expect(main.getByRole("link"), "/ main links").toHaveCount(2);
+    await expect(
+      main.locator('[data-slot="hero"]').getByRole("link"),
+      "/ hero links",
+    ).toHaveCount(2);
     const cta = main.getByRole("link", { name: label, exact: true });
     await expect(cta, `/ CTA ${label} href`).toHaveAttribute("href", href);
     expect(href, `/ CTA ${label} href is internal`).not.toMatch(
