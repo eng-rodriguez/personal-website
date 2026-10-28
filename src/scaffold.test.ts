@@ -41,6 +41,6 @@ describe("scaffold configuration", () => {
     expect(pkg.scripts.e2e).toBe("playwright test");
     expect(pkg.scripts.check).not.toContain("e2e");
     // Exact pin: the browser build is tied to the package version (ADR 0005).
-    expect(pkg.devDependencies["@playwright/test"]).toBe("1.63.0");
+    expect(pkg.devDependencies["@playwright/test"]).toBe("1.64.1");
   });
 });
