@@ -1,8 +1,8 @@
 # The projects page now lists every project and lets visitors filter them
 
-**Status:** Ready for review
+**Status:** Shipped
 **Date:** 2026-10-30 · **Milestone:** none · **Risk:** Standard
-**Links:** Ticket [PROJ-002](https://github.com/eng-rodriguez/personal-website/issues/11) · [Story](../stories/proj-002-projects-index.md) · [Brief](../briefs/proj-002-projects-index.md) · [PR](pending)
+**Links:** Ticket [PROJ-002](https://github.com/eng-rodriguez/personal-website/issues/11) · [Story](../stories/proj-002-projects-index.md) · [Brief](../briefs/proj-002-projects-index.md) · [PR](https://github.com/eng-rodriguez/personal-website/pull/60)
 
 ## What we delivered
 The projects page shows each published project as a card with its summary, status and technologies. Visitors can narrow the list by status and by technology. The filters run in the browser with no server, and the page announces how many projects match. Without JavaScript the full list still shows. No projects are published yet, so today the page still says "No projects yet".
