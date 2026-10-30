@@ -130,4 +130,17 @@ describe("content docs", () => {
     expect(projects).toContain("at most 3");
     expect(projects).toContain("no ordering field");
   });
+
+  it("test_ac16_content_guide_states_what_drives_the_projects_filters", () => {
+    const doc = read("docs/content.md");
+    const projects = doc.slice(
+      doc.indexOf("## Project Frontmatter"),
+      doc.indexOf("## Case studies"),
+    );
+    expect(projects).toContain(
+      "`status` and `stack` drive the `/projects` filters",
+    );
+    expect(projects).toContain("no category or tags field");
+    expect(projects).toContain("first Project");
+  });
 });

@@ -53,6 +53,14 @@ describe.each(pages)("%s", (file, Page, title, emptyText) => {
     }
   });
 
+  it("test_ac16_projects_has_no_filters_while_content_is_empty", () => {
+    if (file !== "app/projects/page.tsx") return;
+    render(<Page />);
+    expect(screen.queryByRole("group", { name: "Filters" })).toBeNull();
+    expect(screen.queryByRole("radio")).toBeNull();
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+
   it("test_ac9_no_longer_carries_the_duplicated_class_strings", () => {
     const source = readFileSync(join(process.cwd(), "src", file), "utf8");
     expect(source).not.toContain("text-3xl font-semibold tracking-tight");

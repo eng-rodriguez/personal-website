@@ -371,12 +371,12 @@ Explicitly not changed: `package.json`, `package-lock.json`, `next.config.ts`, `
 - Builder-verified at implementation: the items listed in section 9.
 
 ## 14. Checkpoint
-- Phase: brief approved, implementation next
+- Phase: implemented, local checks green, PR next
 - Scope: PROJ-002 as in the approved story (AC1 to AC18, decisions 1 to 8; decision 1 confirmed as `status` only and decision 7 as no links) and this brief
 - Baseline: `origin/main` at 9be10a1 (`feat/proj-002-projects-index` branched from it; the brief was drafted against f7dd765, same tree for `src/`, `e2e/` and `docs/` except `src/scaffold.test.ts`). Untracked user files `AGENTS.md`, `docs/reviews/dependabot-actions-pr-34.md` and `docs/reviews/dependabot-prs-56-57.md` preserved and not part of this change
-- Revisions: none yet
+- Revisions: `FilterableProject` is `Pick<Project, "slug" | "status"> & { readonly stack: readonly string[] }` (not a plain Pick), because `Project.stack` is a mutable array and the client items hold readonly key arrays. `@testing-library/user-event` is not installed, so component tests use `fireEvent`; arrow-key and Tab behavior is covered by the Playwright spec only.
 - Approvals: story approved by @eng-rodriguez, with Category = `status` only and cards not links confirmed explicitly; brief approved by @eng-rodriguez with the section 13 choices, including back-forward cache restoring the last selection
-- Check evidence: none yet
+- Check evidence: `npm run check` exit 0 (Vitest 53 files, 708 tests; build lists `/projects` as ○). `npm run e2e` exit 0 (53 passed, Chromium; the empty-content cases annotate). With the D1 fixtures copied into `content/projects` (since removed, `git status --short content` empty): build `/projects` ○, built HTML has Alpha/Beta/Gamma titles, `data-project-filters`, no "Draft hidden", no "Elixir", no `href="/projects/`, no `example.com/repo`, no `<img`; `e2e/projects-index.spec.ts` and `e2e/no-js.spec.ts` 14 passed with no content annotation. Builder-verified: empty-content built HTML has one `<h1`, "No projects yet", no `data-project-filters`; `grep -lE 'loadCollection|node:path|compileContent' .next/static/chunks/*.js` prints nothing; built CSS has `@media not print{.not-print\:hidden{display:none}}` and `group-has-checked\:inline`; fixtures load in jsdom through `getProjects()` and pass the real loader and `projects-content.test.ts` (compile). Manual steps 5 to 8 (human only) and CI are pending.
 - Repairs used: 0 of 3
 - Remaining blockers: none
-- Next action: factory:react-builder implements on `feat/proj-002-projects-index` in the section 1 order
+- Next action: owner runs Manual steps 5 to 8, then opens the PR

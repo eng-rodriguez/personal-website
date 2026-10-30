@@ -266,6 +266,18 @@ describe("no-JavaScript menu", () => {
   });
 });
 
+describe("no-JavaScript project filters", () => {
+  it("test_d5_hides_the_filters_until_the_script_has_run", () => {
+    let found: Rule | undefined;
+    root.walkRules((r) => {
+      if (r.selector === "html:not([data-js]) [data-project-filters]")
+        found = r;
+    });
+    expect(found && declarations(found).get("display")).toBe("none");
+    expect(found?.parent).toBe(root);
+  });
+});
+
 describe("design tokens", () => {
   it("declares the same color tokens in both themes", () => {
     const names = (theme: Map<string, string>) =>

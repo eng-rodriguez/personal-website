@@ -181,3 +181,8 @@ html:not([data-js]) [data-menu-toggle] {
 html:not([data-js]) [data-primary-nav] {
   display: block;
 }
+
+/* Without JavaScript the filters cannot work: hide them; every Project stays listed. */
+html:not([data-js]) [data-project-filters] {
+  display: none;
+}
