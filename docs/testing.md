@@ -55,3 +55,4 @@ Keep an exact pin in `package.json` and follow the 2-week rule for new releases.
 - Fixtures live in `src/lib/__fixtures__/articles/<case>/` and `src/lib/__fixtures__/projects/<case>/`. Pass `directory` and `mode` to the loader functions instead of changing real content.
 - `src/lib/articles-content.test.ts` validates and compiles the real `content/articles`, drafts included, so invalid content fails `npm run check`. `src/lib/projects-content.test.ts` does the same for `content/projects`.
 - The `home` case under each type is used by `src/lib/home.test.ts`. Its files are copied into `content/` only for the HOME-003 manual check.
+- The `index` case under `projects` is used by `src/lib/project-filters.test.ts` and `src/components/site/project-index.test.tsx`. Its files are copied into `content/` only for the PROJ-002 manual check. `e2e/projects-index.spec.ts` adds a `content` annotation when no Projects exist.

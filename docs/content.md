@@ -113,6 +113,8 @@ Unknown keys are rejected, also inside `links` and `cover`. Reachability of the 
 
 The home page shows the Projects with `featured: true`, at most 3, newest `startedAt` first (then by slug). There is no ordering field: to change the choice, change `startedAt` or unset `featured`. Drafts never show in production and do not take one of the 3 slots.
 
+`status` and `stack` drive the `/projects` filters: Category comes from `status` and Technology from `stack`. There is no category or tags field. `stack` spelling matters: entries that differ only by case are one option, labelled with the spelling of the first Project in the list (the newest). A draft never creates an option in production.
+
 ## Case studies
 A case study is a Project with `caseStudy: true`. Its body must contain these level-2 headings, each exactly once and in this order:
 

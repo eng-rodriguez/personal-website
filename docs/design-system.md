@@ -43,7 +43,7 @@ The visitor chooses System (default), Light or Dark with the Theme toggle in the
 
 - System follows the OS live in CSS alone, with no listener. Light and Dark pin the theme, so OS changes do nothing. Other tabs follow a change through the `storage` event.
 - When printing, the page is always light (the `print` media type): dark tokens exist only under `@media screen`.
-- Without JavaScript `data-js` is absent, so the toggle is hidden (`display: none`) and the page follows the OS.
+- Without JavaScript `data-js` is absent, so the toggle is hidden (`display: none`) and the page follows the OS. The Projects filters use the same `data-js` hook.
 - The `dark:` variant is redefined with `@custom-variant dark` to match the same two dark states. Components still avoid `dark:`: per-theme differences belong in token values, where the contrast test checks both dark blocks. There is no `.dark` class and no `next-themes`.
 - `layout.tsx` exports `viewport.colorScheme` so the canvas and native controls match the OS before the stylesheet loads.
 
@@ -209,6 +209,20 @@ After the Hero, `/` renders up to two preview sections from `HomePreviews` (`src
 - Links: card titles go to `/projects` or `/writing`, and each section ends with a "View all projects" or "View all writing" link to the same page. No card links to a detail route until the detail pages exist.
 - Dates: `formatContentDate` in `src/lib/dates.ts` formats `YYYY-MM-DD` as en-US in UTC, for example `Oct 25, 2026`, so the day never shifts with the time zone.
 - Checks: no horizontal scrollbar at 320px and at 1280px with 200% zoom, Tab reaches each card title and "View all" link in reading order with the outline in Light and Dark, and every link measures at least 24 by 24 CSS pixels.
+
+## Projects index
+
+`/projects` renders `ProjectIndex` (`src/components/site/project-index.tsx`, a Server Component) with `getProjects()`: a Card per Project in that order (`startedAt` descending, then slug). The cards are server HTML. `ProjectFilters` (`src/components/site/project-filters.tsx`, a Client Component) receives them as nodes and holds the selection in local state. The rules live in `src/lib/project-filters.ts`, a pure module with no React or `node:` import.
+
+- Card: the title as an `h2` (the PageHeading stays the only `h1`), the summary, "Status: Active", "Status: Completed" or "Status: Archived" as muted text, and one Tag per `stack` entry. The title is not a link: no card links anywhere until the detail route exists (PROJ-003). Links, cover, role, dates and `caseStudy` are not shown.
+- Filters: a "Filters" group with two native radio groups. Category comes from `status` and lists the statuses present, in lifecycle order (Active, Completed, Archived). Technology comes from `stack`: one option per distinct entry across the listed Projects, grouped case-insensitive, labelled with the spelling of the first Project in `getProjects()` order that has it, sorted alphabetically (en-US). "All" is first in each group. Each group is single-select and the groups combine with AND. Options exist only for listed Projects, so a draft never creates one in production. No category or tags field exists.
+- Count: a `role="status"` region (polite, atomic) holds one message, "3 projects", "1 project" or "No matching projects", replaced on each change.
+- Empty states: "No projects yet" when there are no Projects, with no controls and no count. "No matching projects" with a "Clear filters" button when a combination matches nothing; the button resets both groups to All and moves focus to the Category "All" radio.
+- No JavaScript: a rule in `globals.css` hides `[data-project-filters]` until `data-js` is set, so every Project is listed and nothing implies filtering. Controls render disabled until hydration.
+- Print: every card prints, whatever the selection (non-matching cards use `not-print:hidden`), without the controls or the count.
+- State: local only. Reload shows All; there is no URL sync. The back-forward cache may restore the last selection, and the controls and the list always agree.
+- Selected option: a primary fill, semibold text and a "✓" mark, so color is not the only cue; an underline in forced-colors mode.
+- Checks: no horizontal scrollbar at 320px and at 1280px with 200% zoom, options and Tags wrap, every option is at least 24 by 24 CSS pixels (40px high), and the outline shows in Light and Dark.
 
 ## Breakpoints
 

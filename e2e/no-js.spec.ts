@@ -97,4 +97,32 @@ test.describe("without JavaScript", () => {
       `${href} h1`,
     ).toBeVisible();
   });
+
+  test("/projects without JavaScript lists every Project and hides the filters", async ({
+    page,
+  }) => {
+    await page.goto("/projects");
+    const main = page.getByRole("main");
+    const cards = main.getByRole("article");
+    if ((await cards.count()) === 0) {
+      test.info().annotations.push({
+        type: "content",
+        description: "no Projects on /projects; filter checks not exercised",
+      });
+      await expect(
+        main.getByText("No projects yet", { exact: true }),
+        "/projects empty state",
+      ).toBeVisible();
+      return;
+    }
+    await expect(
+      page.locator("[data-project-filters]"),
+      "/projects filters",
+    ).toBeHidden();
+    await expect(main.getByRole("radio"), "/projects radios").toHaveCount(0);
+    await expect(page.getByRole("status"), "/projects status").toHaveCount(0);
+    for (const card of await cards.all()) {
+      await expect(card, "/projects card").toBeVisible();
+    }
+  });
 });
